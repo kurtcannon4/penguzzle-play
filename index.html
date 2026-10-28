@@ -1,0 +1,2271 @@
+<!DOCTYPE html>
+<!--
+  PENGUZZLE: NOTES FOR THE NATIVE APP BUILD (Claude Code)
+  Required: Daily share links must work everywhere.
+  1. Share card link (see shareLink() in the script) should point to the public website,
+     e.g. https://penguzzle.com/daily, not the App Store and not a temporary host.
+  2. iPhone with the app installed: that link opens the app directly via Universal Links
+     (apple-app-site-association file on the website + Associated Domains entitlement in the app).
+  3. iPhone without the app: the web page shows Apple's Smart App Banner
+     (<meta name="apple-itunes-app" content="app-id=YOUR_APP_ID, app-argument=URL">) linking to the App Store,
+     AND the web version stays fully playable.
+  4. Android and computers: the same link opens the playable web version.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Penguzzle</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Penguzzle">
+<meta name="theme-color" content="#2C7DB4">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E4F2FA; --surface:#FFFFFF; --ice:#D3ECF7; --ice-edge:#A6D3EA; --snow:#F8FCFE;
+  --sea:#2C7DB4; --num:#1A5583; --ink:#1D2A44; --muted:#56708A; --beak:#FF9A3C;
+  --good:#1F9A63; --bad:#D9434F; --ring:#FF8A2A; --sunny:#FFF1CC; --shady:#A8CDE6;
+  --plank:#FFFFFF; --sheet:rgba(29,42,68,.45);
+  /* Drifting snow behind the home screen. White on the light background is white on white,
+     so light mode gets a soft blue fleck instead. */
+  --fleck:rgba(120,170,205,.55); --fleck2:rgba(120,170,205,.33);
+  /* The plate under a square that was filled in before you started. Warm against the
+     board's blues, so "given" reads as a different kind of thing from "placed". */
+  --preset:#FFEFD2; --preset-edge:#E0A75C;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1F31; --surface:#15304A; --ice:#1F4567; --ice-edge:#2F6189; --snow:#1A3A57;
+    --sea:#5DB3E8; --num:#CFE8F8; --ink:#EAF4FB; --muted:#9EB6CC; --good:#4CCB8F; --bad:#FF7480;
+    --ring:#FFB067; --sunny:#3D3622; --shady:#173A58; --plank:#1E4466; --sheet:rgba(0,0,0,.6);
+    --fleck:rgba(255,255,255,.55); --fleck2:rgba(255,255,255,.35);
+    --preset:#3A3220; --preset-edge:#C8903F;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1F31; --surface:#15304A; --ice:#1F4567; --ice-edge:#2F6189; --snow:#1A3A57;
+  --sea:#5DB3E8; --num:#CFE8F8; --ink:#EAF4FB; --muted:#9EB6CC; --good:#4CCB8F; --bad:#FF7480;
+  --ring:#FFB067; --sunny:#3D3622; --shady:#173A58; --plank:#1E4466; --sheet:rgba(0,0,0,.6);
+    --fleck:rgba(255,255,255,.55); --fleck2:rgba(255,255,255,.35);
+    --preset:#3A3220; --preset-edge:#C8903F;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.5 Nunito,"Trebuchet MS",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+h1,h2,h3{font-family:"Baloo 2","Arial Rounded MT Bold",system-ui,sans-serif;line-height:1.1;margin:0}
+button{font:inherit;color:inherit}
+button:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 40px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:10px;padding:10px 16px;max-width:560px;margin:0 auto}
+.top{flex-wrap:wrap;row-gap:4px}
+.top h1{order:10;flex-basis:100%;font-size:25px;font-weight:800;margin:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top h1:empty{display:none}
+#timer{margin-left:auto}
+#helpBtn{flex:none;width:34px;height:34px;border-radius:50%;border:none;background:var(--surface);color:var(--ink);font:800 19px/1 "Baloo 2",sans-serif;cursor:pointer}
+#helpBody p{margin:8px 0}
+#helpBody{text-align:left}
+#back{background:var(--surface);border:none;border-radius:999px;padding:6px 14px;font-weight:800;cursor:pointer}
+#timer{font:700 18px "Baloo 2",sans-serif;color:var(--muted);min-width:48px;text-align:right}
+
+/* home */
+.hero{display:flex;align-items:flex-end;gap:14px;padding:18px 0 8px}
+.hero .mascot{width:92px;flex:none}
+.hero h2{font-size:44px;font-weight:800;letter-spacing:-.5px}
+.hero p{margin:4px 0 0;color:var(--muted)}
+.floes-list{display:flex;flex-direction:column;gap:18px;margin-top:22px}
+.floe{background:var(--surface);padding:18px 18px 16px;display:grid;grid-template-columns:64px 1fr;gap:4px 14px;align-items:center;box-shadow:0 6px 0 var(--ice-edge)}
+.floe:nth-child(1){border-radius:28px 44px 30px 40px}
+.floe:nth-child(2){border-radius:46px 26px 42px 30px}
+.floe:nth-child(3){border-radius:32px 40px 24px 48px}
+.floe .ic{grid-row:span 2;width:64px;height:64px;display:grid;place-items:center;background:var(--ice);border-radius:50%}
+.floe .ic svg{width:44px}
+.floe h3{font-size:24px}
+.floe p{margin:0;color:var(--muted);font-size:15px}
+.floe .log{grid-column:2;font-size:13px;color:var(--muted)}
+.floe .play{grid-column:1/-1;margin-top:10px;justify-self:start}
+.btn{background:var(--sea);color:#fff;border:none;border-radius:999px;padding:10px 20px;font-weight:800;cursor:pointer}
+:root[data-theme="dark"] .btn{color:#0D1F31}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0D1F31}}
+.btn.ghost,:root .btn.ghost,:root:not([data-theme="light"]) .btn.ghost{background:var(--surface);color:var(--ink)}
+.note{margin-top:28px;color:var(--muted);font-size:14px}
+.note button{background:none;border:none;color:var(--sea);font-weight:800;cursor:pointer;padding:0}
+
+/* game */
+details.howto{background:var(--surface);border-radius:18px;padding:10px 16px;margin:6px 0 14px}
+details.howto summary{font-weight:800;cursor:pointer}
+details.howto p{margin:8px 0}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}
+.legend span{display:flex;align-items:center;gap:6px;font-weight:700}
+.mini{display:inline-flex;align-items:flex-end;justify-content:center;flex:none;font-style:normal}
+.mini>i{display:block}
+.mini svg{width:100%;height:auto;display:block}
+#hud{display:flex;justify-content:center;gap:16px;font-weight:800;color:var(--muted);margin-bottom:10px;min-height:24px}
+#hud b{color:var(--ink)}
+#board{display:flex;justify-content:center;overflow-x:auto;padding:12px 0 4px}
+#msg{text-align:center;min-height:24px;margin:10px 0 4px;font-weight:700}
+#msg.ok{color:var(--good)} #msg.err{color:var(--bad)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px}
+.actions .btn{padding:9px 16px}
+
+.sandbox{background:var(--surface);border-radius:22px;padding:16px;margin-top:24px}
+.sandbox h2{font-size:22px}
+.sandbox .sub{color:var(--muted);font-size:14px;margin:2px 0 12px}
+.ctrl{margin:12px 0}
+.ctrl label{display:flex;justify-content:space-between;font-weight:800;font-size:15px}
+.ctrl input[type=range]{width:100%;accent-color:var(--sea)}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.seg button{border:2px solid var(--ice-edge);background:transparent;border-radius:999px;padding:5px 12px;font-weight:700;font-size:14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--sea);border-color:var(--sea);color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:#0D1F31}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#0D1F31}}
+.stats{margin-top:14px;border-top:2px dashed var(--ice-edge);padding-top:12px;font-size:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.stats dt{color:var(--muted)} .stats dd{margin:0;font-weight:800}
+
+/* shared cells */
+.grid{display:grid;grid-template-columns:repeat(var(--cols),var(--cell));gap:4px}
+.cell{width:var(--cell);height:var(--cell);border-radius:10px;border:none;padding:0;display:grid;place-items:center;position:relative;font:800 calc(var(--cell)*.48)/1 "Baloo 2",sans-serif;cursor:pointer}
+.cell svg{width:76%;height:auto;pointer-events:none}
+.ice{background:linear-gradient(160deg,var(--ice),var(--ice-edge));box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.clue{background:var(--snow);color:var(--num);box-shadow:inset 0 0 0 2px var(--ice)}
+.ringed{box-shadow:inset 0 0 0 3px var(--ring)}
+.clue.active{background:var(--ring);color:#fff}
+.flagbad{background:var(--bad)!important;color:#fff!important}
+.dot::after{content:"";width:22%;height:22%;border-radius:50%;background:var(--muted);opacity:.55}
+.maybe{color:var(--ring)}
+.ghost svg{opacity:.4}
+.static{cursor:default}
+
+/* tippy */
+.floes{display:flex;flex-direction:column;gap:20px;align-items:flex-start;padding:4px 30px 0 30px}
+.rowclr{position:absolute;left:-29px;top:50%;transform:translateY(-75%);width:24px;height:24px;border-radius:50%;border:none;background:var(--surface);color:var(--muted);font:800 12px/1 Nunito,sans-serif;cursor:pointer;display:grid;place-items:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.rowclr:active{transform:translateY(-75%) scale(.9)}
+.frow{position:relative;padding-bottom:16px}
+/* The ×N strip sits in its own wrapper rather than inside .frow, so the absolutely
+   positioned tray, clear button and fulcrum keep measuring from the plank and not from
+   the top of a taller box. */
+.floegroup{display:flex;flex-direction:column}
+.mults{display:grid;grid-template-columns:repeat(var(--w),var(--cell));gap:3px;padding:0 4px 2px}
+.mults span{text-align:center;font:800 13px "Baloo 2",sans-serif;color:var(--num);opacity:.7}
+.mults span.piv{color:var(--sea);opacity:1}
+.balcard{background:var(--surface);border-radius:16px;padding:12px;margin:12px 0 0;text-align:center;color:var(--ink)}
+.balcard .brow{display:flex;align-items:flex-start;justify-content:center;gap:8px}
+.balcard .bside{flex:1;display:flex;flex-direction:column;gap:2px}
+.balcard .bside small{font:800 11px Nunito,sans-serif;color:var(--muted)}
+.balcard .bside em{font:600 13px Nunito,sans-serif;font-style:normal}
+.balcard .bside b{font:800 20px "Baloo 2",sans-serif;color:var(--num)}
+.balcard .bside b.win{color:var(--ring)}
+.balcard .bop{font:800 22px "Baloo 2",sans-serif;color:var(--muted);min-width:24px;padding-top:16px}
+.balcard .bop.ok{color:var(--good)}
+.balcard .brock{font:500 12px Nunito,sans-serif;color:var(--muted);margin:8px 0 0}
+.balcard .bstep{font:800 13px Nunito,sans-serif;margin:8px 0 0;line-height:1.4}
+.balcard .bstep.ok{color:var(--good)}
+.balcard .bcol{display:flex;align-items:baseline;justify-content:center;gap:10px}
+.balcard .bcol small{font:800 12px Nunito,sans-serif;color:var(--muted)}
+.balcard .bcol b{font:800 18px "Baloo 2",sans-serif;color:var(--num)}
+.balcard .bcol b.ok{color:var(--good)}
+.balcard .bcol b.part{color:var(--ring)}
+.sums span.focus{box-shadow:0 0 0 3px var(--ring)}
+.plank{display:grid;grid-template-columns:repeat(var(--w),var(--cell));gap:3px;padding:4px;background:var(--plank);border-radius:12px 12px 18px 18px;box-shadow:0 4px 0 var(--ice-edge);transition:transform .45s cubic-bezier(.3,1.5,.5,1)}
+.slot{width:var(--cell);height:var(--cell);border-radius:9px;border:2px dashed var(--ice-edge);background:transparent;padding:0;display:grid;place-items:end center;cursor:pointer}
+.slot.piv{border-color:transparent}
+.igloo{position:absolute;left:4%;right:4%;bottom:2%;display:block;pointer-events:none;transition:opacity .2s}
+.igloo svg{width:100%;height:auto;display:block}
+.slot.piv.has .igloo{opacity:.35}
+.slot > span{position:relative;z-index:1;transform:rotate(var(--lean,0deg));transform-origin:50% 100%;transition:transform .45s cubic-bezier(.3,1.5,.5,1)}
+.frow.worried .slot:not(.ghost) > span{animation:wobble 1.1s ease-in-out infinite}
+@keyframes wobble{0%,100%{transform:rotate(var(--lean,0deg))}50%{transform:rotate(calc(var(--lean,0deg) - 5deg))}}
+.water{position:absolute;left:-8px;right:-8px;bottom:0;height:11px;pointer-events:none;opacity:.55;border-radius:6px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='11' viewBox='0 0 40 11'%3E%3Cpath d='M0 5 Q10 0 20 5 T40 5 V11 H0Z' fill='%234FA6DD'/%3E%3C/svg%3E") repeat-x 0 0/40px 11px;animation:drift 6s linear infinite}
+@keyframes drift{to{background-position:40px 0}}
+.fulcrum{z-index:1}
+.bal{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-2.2px) rotate(-2deg)}}
+@media (prefers-reduced-motion:reduce){.frow.worried .slot > span,.water,.bal{animation:none}}
+.ptrack{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 12px;background:var(--surface);border-radius:16px;padding:6px 12px;margin:0 auto 14px;width:max-content;max-width:100%}
+.ptrack .pl{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;color:var(--muted)}
+.ptrack .pl i{width:24px;display:block}
+.ptrack .pc{display:flex;align-items:flex-end;gap:3px;border-radius:10px;padding:2px 6px}
+.ptrack .pc b{font:800 16px/1 "Baloo 2",sans-serif}
+.ptrack .pc.full{background:var(--good);color:#fff}
+.ptrack .pc.over{background:var(--bad);color:#fff}
+.slot.given{background:var(--ice);border-style:solid;cursor:default}
+/* Narrower than .given, which also covers squares a power-up revealed. A preset is a fact
+   you were handed; the distinction is what you need when retracing your own reasoning, and
+   a solid-vs-dashed border alone vanishes under the penguin sitting on it. */
+.slot.preset{background:var(--preset);border-color:var(--preset-edge);border-width:2.5px}
+.slot.preset::after{content:"";position:absolute;top:0;right:0;width:30%;height:30%;
+  background:var(--preset-edge);clip-path:polygon(100% 0,0 0,100% 100%);pointer-events:none}
+.slot svg{pointer-events:none}
+.slot{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.slot.xmark{place-items:center;color:var(--muted);font:800 calc(var(--cell)*.45)/1 "Baloo 2",sans-serif}
+.fulcrum{position:absolute;bottom:0;width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:16px solid var(--sea);transform:translateX(-50%)}
+.fulcrum.ok{border-bottom-color:var(--good);border-left-width:13px;border-right-width:13px;border-bottom-width:19px}
+.rowok{position:absolute;right:-26px;top:50%;transform:translateY(-70%);font:800 20px "Baloo 2";color:var(--good)}
+.sums{display:grid;grid-template-columns:repeat(var(--w),var(--cell));gap:3px;padding:0 4px 0 34px;margin-top:6px}
+.sums span{text-align:center;font:800 18px "Baloo 2";color:var(--num);border-radius:8px;background:var(--snow)}
+.sums span{display:flex;flex-direction:column;line-height:1.05;padding:3px 0}
+.sums small{font:700 12px Nunito,sans-serif;opacity:.85}
+.sums span.over{background:var(--bad);color:#fff}
+.sums span.hit{background:var(--good);color:#fff}
+.sumlabel{font-size:13px;color:var(--muted);margin:2px 4px 0 34px;font-weight:700}
+
+/* chill */
+.sea{background:var(--sunny);transition:background .25s}
+.sea.shaded{background:var(--shady)}
+.rclue,.cclue{background:transparent;font:800 calc(var(--cell)*.42)/1 "Baloo 2";color:var(--num);display:grid;place-items:center;border-radius:10px;width:var(--cell);height:var(--cell)}
+.rclue.hit,.cclue.hit{color:var(--good)} .rclue.over,.cclue.over{color:var(--bad)}
+.corner{font-size:calc(var(--cell)*.5)}
+
+/* win sheet */
+/* `height` in dvh, not just inset:0. A fixed element sizes itself to the *large* viewport on
+   iOS Safari — the one with the URL bar hidden — so a bottom-anchored sheet can start above
+   the visible top of the page. Its own overflow scroll can't get that back, because the part
+   that's missing is clipped by the viewport rather than by the sheet. dvh tracks the area
+   actually on screen. The vh line stays as a fallback for browsers without dvh. */
+.sheetbg{position:fixed;inset:0;height:100vh;height:100dvh;background:var(--sheet);display:grid;place-items:end center;z-index:20;padding-top:env(safe-area-inset-top,0px)}
+.sheetbg[hidden]{display:none}
+/* Hides the win sheet so the finished board can be looked at. The sheet is only faded, not
+   removed, so nothing reflows and one tap anywhere brings it straight back. */
+#win.peeking{background:transparent}
+#win.peeking .sheet{opacity:0;transform:translateY(12px)}
+#win .sheet{transition:opacity .18s ease,transform .18s ease}
+#win.peeking #winBack{display:block}
+#winBack{display:none;position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:60;
+  background:var(--sea);color:#fff;border:none;border-radius:999px;padding:10px 16px;
+  font:800 13px Nunito,sans-serif;pointer-events:none}
+#winEye{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;
+  border:none;background:var(--ice);color:var(--ink);font-size:15px;cursor:pointer;z-index:2}
+.sheet{position:relative;background:var(--surface);width:100%;max-width:560px;border-radius:28px 28px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom,0px));text-align:center}
+.sheet h2{font-size:34px}
+.sheet .mascot{width:70px;margin:0 auto 4px;display:block}
+.rate{display:flex;justify-content:center;gap:8px;margin:10px 0 16px}
+.rate button{background:var(--ice);border:none;border-radius:14px;width:52px;padding:6px 0;cursor:pointer;font-weight:800}
+.rate button svg{width:30px;display:block;margin:0 auto}
+.rate button[aria-pressed="true"]{background:var(--sea);color:#fff}
+
+@media (prefers-reduced-motion:reduce){.plank{transition:none}.sea{transition:none}}
+
+/* tippy extras */
+.tray{position:absolute;right:-28px;top:0;display:flex;flex-direction:column;width:22px}
+.tray .mini{transition:opacity .2s}
+.tray .mini.used{opacity:.18;filter:grayscale(1)}
+.slot.autox{opacity:.45}
+.slot{position:relative;overflow:visible}
+.wb{position:absolute;top:-6px;left:-5px;z-index:3;font:800 10px/1.3 "Baloo 2",sans-serif;background:#18A3A8;color:#fff;border-radius:999px;padding:0 4px;min-width:14px;text-align:center;box-shadow:0 0 0 1.5px #fff,0 1px 2px rgba(0,0,0,.3);pointer-events:none}
+.wb.c1{background:#E09B00}.wb.c2{background:#3D7DD8}.wb.c3{background:#2E3A5C}
+.ghost .wb{opacity:.45}
+.wb.neg{background:#FF5A6E}
+.snz{position:absolute;left:2%;bottom:6%;width:calc(200% + 3px);z-index:1;pointer-events:none;transform:rotate(var(--lean,0deg));transform-origin:50% 100%}
+.snz svg{width:100%;height:auto;display:block}
+.slot.snzr{border-color:transparent}
+.wb.twin{background:#F07FA8}.wb.wham{background:#4B3FA8}.wb.snzb{background:#3E8F6E}
+.snz.flip svg{transform:scaleX(-1)}
+.zz{animation:zz 2.6s ease-in-out infinite}.z2{animation-delay:1.3s}
+@keyframes zz{0%{opacity:0;transform:translateY(4px)}40%{opacity:1}100%{opacity:0;transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.zz{animation:none}}
+.slot.boxslot{border-style:solid;border-color:#D3A06A;background:rgba(211,160,106,.12);cursor:pointer}
+.wb.q{background:#B98348}
+.purenote{background:var(--surface);border-radius:12px;padding:8px 12px;font-weight:700}
+.twist{background:var(--ice);border-radius:14px;padding:10px 12px;margin:6px 0 10px}
+.twist h3{font-size:20px;margin-bottom:2px}
+.twist .tw{display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--ice-edge)}
+.twist .tw:first-of-type{border-top:none}
+.twic{display:flex;justify-content:center}
+.twh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.twh b{font:800 17px/1.2 "Baloo 2",sans-serif}
+.chip{background:var(--surface);border-radius:999px;padding:1px 9px;font-weight:800;font-size:13px;color:var(--num)}
+.twt{font-size:14px;color:var(--muted);line-height:1.35;margin-top:2px}
+.twnote{margin:4px 0 0;font-size:13px;color:var(--muted)}
+.slot.hintcell{outline:3px solid var(--ring);outline-offset:1px;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{outline-color:transparent}}
+.frow.lock{animation:floeBounce .55s ease}
+.frow.lock .slot > span{animation:hop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes floeBounce{30%{transform:translateY(-7px)}60%{transform:translateY(2px)}}
+@keyframes hop{40%{transform:translateY(-38%) scale(1.08)}}
+/* levels */
+.tier{font-size:26px;margin:22px 0 2px}
+.tierp{margin:0 0 12px;color:var(--muted)}
+.lvgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.lv{aspect-ratio:1;border:none;background:var(--surface);cursor:pointer;box-shadow:0 4px 0 var(--ice-edge);border-radius:46% 54% 44% 56% / 52% 46% 54% 48%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;line-height:1}
+.lv .ln{font:800 22px "Baloo 2",sans-serif}
+.lv.done .ln{font-size:18px}
+.lv .st{font-size:12px;letter-spacing:1px;margin-top:1px}
+.lv .tm{font:700 11px Nunito,sans-serif;margin-top:2px;opacity:.9}
+.gold{color:#FFC93C}
+.off{opacity:.35}
+.bigstars{font-size:42px;letter-spacing:6px;line-height:1.1}
+.startotal{margin:14px 0 0;color:var(--muted);font-size:14px}
+.startotal .gold{font-size:18px}
+.lv.done{background:var(--snow);color:var(--ink);box-shadow:0 0 0 2px var(--sea),0 4px 0 var(--ice-edge)}
+.dia{background:linear-gradient(135deg,#F2FDFF 0%,#8BE3FF 40%,#3FA9FF 70%,#C9F4FF 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 3px rgba(95,208,255,.95)) drop-shadow(0 0 7px rgba(63,169,255,.6))}
+.bigstars .dia{animation:glint 2.4s ease-in-out infinite}
+@keyframes glint{50%{filter:drop-shadow(0 0 6px rgba(140,230,255,1)) drop-shadow(0 0 14px rgba(63,169,255,.8))}}
+@media (prefers-reduced-motion:reduce){.bigstars .dia{animation:none}}
+.lv.next{box-shadow:0 0 0 3px var(--ring),0 4px 0 var(--ice-edge)}
+.lv:disabled{opacity:.35;cursor:default}
+.floe .btns{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#snd{background:var(--surface);border:none;border-radius:999px;width:38px;height:38px;cursor:pointer;font-size:17px}
+#shareText{white-space:pre-wrap;text-align:left;background:var(--ice);border-radius:12px;padding:10px;font:600 15px/1.4 Nunito,sans-serif;user-select:all}
+.sheet .btnrow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+#winExtra{font-weight:800;color:var(--sea)}
+@media (prefers-reduced-motion:reduce){.frow.lock,.frow.lock .slot > span,.slot.hintcell{animation:none}}
+
+/* fish + power-ups */
+#fishBtn{background:var(--surface);border:none;border-radius:999px;height:38px;padding:0 12px;cursor:pointer;font:800 16px "Baloo 2",sans-serif;display:flex;align-items:center;gap:4px}
+.pubar{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;margin-top:12px;scrollbar-width:none}
+.pubar[hidden]{display:none}
+.pu{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;width:78px;padding:8px 4px;border:none;border-radius:16px;background:var(--surface);cursor:pointer;box-shadow:0 3px 0 var(--ice-edge)}
+.pu .pi{height:28px;display:grid;place-items:center;font-size:20px;position:relative}
+.sweepic{position:relative;display:inline-block}
+.sweepic svg{height:24px;width:auto;display:block}
+.sweepic b{position:absolute;top:-7px;right:-11px;font-size:12px}
+.pu .pi svg{height:24px;width:auto}
+.pu .pn{font:800 12px/1.1 Nunito,sans-serif;text-align:center}
+.pu .pc{font:800 12px "Baloo 2",sans-serif;color:var(--muted)}
+.pu.on{box-shadow:0 0 0 3px var(--ring),0 3px 0 var(--ice-edge)}
+.pu:disabled,.pu.off{opacity:.4}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:max-content;max-width:min(90vw,420px);background:var(--ink);color:var(--bg);padding:11px 15px;border-radius:16px;font-weight:700;font-size:15px;line-height:1.35;z-index:40;box-shadow:0 6px 20px rgba(0,0,0,.3);text-align:center}
+.toast[hidden]{display:none}
+.slot.pick{outline:2px dashed var(--ring);outline-offset:-3px}
+.rowok{position:absolute;right:-26px;top:50%;transform:translateY(-70%);font:800 22px "Baloo 2";color:var(--good)}
+.sums span.vcol{box-shadow:0 0 0 2px var(--good)}
+.packs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.pack{border:none;border-radius:16px;background:var(--ice);padding:12px 4px;cursor:pointer;display:flex;flex-direction:column;gap:4px;align-items:center}
+.pack .pf{font:800 18px "Baloo 2",sans-serif}.pack .pp{font-weight:800;color:var(--sea)}
+.pulist{text-align:left;font-size:14px;margin:6px 0 10px;padding:0;list-style:none}
+.pulist li{padding:5px 0;border-top:1px solid var(--ice-edge)}
+.coins-earned{font:800 20px "Baloo 2",sans-serif;color:var(--sea);margin:4px 0}
+.sheet{max-height:90vh;max-height:88dvh;overflow:auto;overscroll-behavior:contain}
+
+/* home scene */
+html,body{overflow-x:hidden}
+.scene{position:relative;display:grid;grid-template-columns:84px minmax(0,1fr) 84px;width:100%;grid-template-rows:auto auto 1fr auto;gap:12px 6px;min-height:calc(100vh - 90px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:calc(100dvh - 90px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));padding:4px 0 22px}
+.scene::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:radial-gradient(circle,var(--fleck) 1.2px,transparent 1.8px),radial-gradient(circle,var(--fleck2) 1px,transparent 1.5px);background-size:46px 46px,29px 29px;background-position:0 0,13px 17px;opacity:.5}
+.brand{grid-column:1/-1;text-align:center;font:800 34px/1 "Baloo 2",sans-serif;letter-spacing:-.5px;color:var(--ink);text-shadow:0 3px 0 var(--ice-edge)}
+.hbar{grid-column:1/-1;position:relative;height:32px;border-radius:999px;background:var(--surface);overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.18),0 0 0 3px var(--ice-edge)}
+.hbar-fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(#FFD86B,#F2A93B);border-radius:999px;transition:width .5s}
+.hbar span{position:relative;display:block;text-align:center;font:800 16px/32px "Baloo 2",sans-serif;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.55)}
+.side{display:flex;flex-direction:column;gap:22px;align-items:center;padding-top:14px}
+.sl{grid-column:1;grid-row:3}.sr{grid-column:3;grid-row:3}
+.bub{position:relative;border:none;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;color:inherit}
+.bic{width:68px;height:68px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff 0%,#D3ECF7 62%,#A6D3EA 100%);display:grid;place-items:center;box-shadow:0 4px 0 #7FB8D8,0 8px 14px rgba(0,0,0,.18);border:3px solid #fff;overflow:hidden}
+.bic svg{width:48px;height:auto}
+.blab{margin-top:-11px;position:relative;background:var(--sea);color:#fff;font:800 13px/1 "Baloo 2",sans-serif;padding:6px 11px;border-radius:999px;box-shadow:0 2px 0 rgba(0,0,0,.22);white-space:nowrap}
+:root[data-theme="dark"] .blab{color:#0D1F31}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .blab{color:#0D1F31}}
+.bub.done .blab{background:var(--good);color:#fff}
+.alert{position:absolute;top:-4px;right:-6px;width:26px;height:26px;border-radius:50%;background:#E5505C;color:#fff;font:800 17px/23px "Baloo 2",sans-serif;font-style:normal;text-align:center;border:2px solid #fff;animation:nudge 2s ease-in-out infinite}
+@keyframes nudge{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-12deg)}90%{transform:rotate(12deg)}95%{transform:rotate(-6deg)}}
+.bfish{font-size:36px}.bstar{font-size:40px;color:#FFC93C;text-shadow:0 2px 0 #E09B00}.bfire{font-size:36px}
+.stage{grid-column:1/-1;grid-row:3;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:4px;z-index:0}
+.side{position:relative;z-index:2}
+.bigpeng{width:min(54vw,220px);animation:idle 2.8s ease-in-out infinite;transform-origin:50% 100%;position:relative;z-index:1}
+.bigpeng svg{width:100%;height:auto;display:block}
+@keyframes idle{50%{transform:translateY(-7px) rotate(-2deg)}}
+.stagefloe{width:min(66vw,260px);height:22px;background:#F4FBFF;border-radius:12px;margin-top:-8px;box-shadow:0 6px 0 #A6D3EA}
+.stagewater{width:min(80vw,320px);height:13px;margin-top:4px;opacity:.6;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='11' viewBox='0 0 40 11'%3E%3Cpath d='M0 5 Q10 0 20 5 T40 5 V11 H0Z' fill='%234FA6DD'/%3E%3C/svg%3E") repeat-x 0 0/40px 11px;animation:drift 6s linear infinite}
+.bigplay{grid-column:1/-1;grid-row:4;justify-self:center;width:min(88%,360px);border:4px solid #FFF6E0;border-radius:30px;padding:16px 10px 14px;background:linear-gradient(#8FE35E,#3CB13A);color:#fff;font:800 40px/1 "Baloo 2",sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.25);box-shadow:0 7px 0 #2C8529,0 12px 22px rgba(0,0,0,.28);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;animation:pulsebtn 2.4s ease-in-out infinite}
+.bigplay small{font:800 15px/1 "Baloo 2",sans-serif}
+.bigplay.spike{background:linear-gradient(#FFB55E,#F27A1B);box-shadow:0 7px 0 #B5520C,0 12px 22px rgba(0,0,0,.28)}
+.bigplay:active{transform:translateY(4px);box-shadow:0 3px 0 #2C8529}
+@keyframes pulsebtn{50%{transform:scale(1.03)}}
+@media (prefers-reduced-motion:reduce){.bigpeng,.bigplay,.alert,.stagewater{animation:none}}
+
+/* in-game header + power-up dock (Colony-style) */
+.tt{order:10;flex-basis:100%;min-width:0}
+.tt[hidden]{display:none}
+.tt h1{margin:0 2px}
+#timer{margin-left:0;text-align:left;min-width:0}
+.rgrp{display:flex;align-items:center;gap:10px;margin-left:auto}
+#pauseBtn{display:none;width:44px;height:44px;border-radius:14px;border:3px solid #fff;background:linear-gradient(#7FA2E8,#4E72C9);box-shadow:0 3px 0 #2F4F99;cursor:pointer;place-items:center;padding:0}
+#pauseBtn i{display:inline-block;width:5px;height:16px;border-radius:2px;background:#fff;margin:0 2.5px}
+body.ingame .top{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:8px;row-gap:2px}
+body.ingame #back{display:none}
+body.ingame #snd{width:32px;height:32px;font-size:15px}
+body.ingame .rgrp{justify-self:end;gap:8px;margin:0}
+body.ingame #helpBtn{width:32px;height:32px;font-size:17px}
+body.ingame #pauseBtn{display:grid;justify-self:start}
+body.ingame #fishBtn{padding:0 10px}
+body.ingame .tt{order:0;text-align:center;grid-column:1/-1;grid-row:2}
+body.ingame .tt h1{font-size:28px;margin:0}
+body.ingame #timer{display:block;text-align:center;font-size:15px;margin:0;line-height:1.1}
+#pubar.pubar{position:fixed;left:0;right:0;bottom:0;z-index:15;margin:0;display:flex;justify-content:flex-start;gap:6px;padding:12px 10px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-radius:26px 26px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.2);overflow-x:auto}
+#pubar[hidden]{display:none}
+#pubar .pu:first-child{margin-left:auto}#pubar .pu:last-child{margin-right:auto}
+#pubar .pu{width:58px;padding:0;background:none;box-shadow:none;gap:5px;position:relative;color:var(--ink)}
+#pubar .pu .pi{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0%,#D3ECF7 62%,#A6D3EA 100%);border:3px solid #fff;box-shadow:0 4px 0 #7FB8D8;display:grid;place-items:center;font-size:24px;color:#1D2A44}
+#pubar .pu .pi svg{height:30px;width:auto}
+#pubar .pu .pn{font:800 11px/1.1 Nunito,sans-serif}
+#pubar .pu .pc{position:absolute;top:38px;right:-4px;background:#3CB13A;color:#fff;border:2px solid #fff;border-radius:999px;padding:0 6px;font:800 11px/1.55 "Baloo 2",sans-serif;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+#pubar .pu.on .pi{box-shadow:0 0 0 4px var(--ring),0 4px 0 #7FB8D8}
+#pubar .pu.off{opacity:.45}
+body.hasdock #game{padding-bottom:130px}
+body.hasdock .toast{bottom:calc(128px + env(safe-area-inset-bottom,0px))}
+.pausegrid{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.pausegrid .btn{width:100%;padding:13px;font-size:17px}
+
+/* inventory badges + buy sheet */
+#pubar .pu .cnt{position:absolute;top:-2px;right:-2px;min-width:22px;height:22px;border-radius:999px;background:#4E72C9;color:#fff;border:2px solid #fff;font:800 12px/18px "Baloo 2",sans-serif;text-align:center;padding:0 4px;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+#pubar .pu .plus{position:absolute;top:36px;right:-4px;width:24px;height:24px;border-radius:50%;background:#3CB13A;color:#fff;border:2px solid #fff;font:800 18px/19px "Baloo 2",sans-serif;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.buyic{width:76px;height:76px;margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0%,#D3ECF7 62%,#A6D3EA 100%);border:3px solid #fff;box-shadow:0 4px 0 #7FB8D8;display:grid;place-items:center;font-size:30px;color:#1D2A44}
+.buyic svg{height:40px;width:auto}
+.buyrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.buyrow .btn{padding:11px 16px}
+.pulist .buyrow{justify-content:flex-start;margin:6px 0 2px}
+.pulist .buyrow .btn{padding:7px 12px;font-size:14px}
+.gift{display:block;font-size:16px;margin-top:4px}
+.clockic{position:relative;display:inline-block;font-size:26px;line-height:1}
+.clockic b{position:absolute;top:-6px;right:-10px;font-size:13px}
+#pubar .pu .plus{top:33px}
+
+.chcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:none;background:var(--surface);border-radius:22px;padding:12px 14px;margin:0 0 10px;cursor:pointer;box-shadow:0 4px 0 var(--ice-edge);color:var(--ink)}
+.chcard.locked{opacity:.6}
+.chic{flex:none;width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0%,#D3ECF7 62%,#A6D3EA 100%);display:grid;place-items:center;border:3px solid #fff;overflow:hidden}
+.chic svg{width:40px;height:auto}
+.cht{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cht b{font:800 19px/1.1 "Baloo 2",sans-serif}
+.cht small{font-size:13px;color:var(--muted);line-height:1.3}
+.chst{font:800 14px "Baloo 2",sans-serif}
+.chgo{font:800 24px "Baloo 2",sans-serif;color:var(--muted)}
+.pickban{background:#FFF1CC;color:#7A5226;border-radius:14px;padding:10px 12px;font-weight:800;text-align:center}
+
+.secstars{font:800 14px Nunito,sans-serif}
+.unlockhint{color:var(--sea);font:800 13px Nunito,sans-serif}
+.sharecard{white-space:pre-wrap;text-align:left;background:var(--ice);border-radius:14px;padding:12px 14px;font:700 16px/1.45 Nunito,sans-serif;margin:10px auto;max-width:300px;user-select:all}
+#devBtn{background:#8A63D2;color:#fff}
+
+.archcount{font:800 18px "Baloo 2",sans-serif;text-align:center;margin:6px 0 0}
+.archgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.arch{border:none;background:var(--surface);border-radius:18px;padding:10px 12px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;color:var(--ink);box-shadow:0 3px 0 var(--ice-edge)}
+.arch .ad{font:800 16px "Baloo 2",sans-serif}
+.arch .an{font-size:12px;color:var(--muted);font-weight:700}
+.arch .at{font-size:13px;font-weight:700}
+.arch .as{font:800 13px "Baloo 2",sans-serif;color:var(--muted)}
+.arch.done{box-shadow:0 0 0 2px var(--good),0 3px 0 var(--ice-edge)}
+.arch.done .as{color:var(--good)}
+.arch.wk{grid-column:span 2}
+.bcal{font-size:34px}
+
+.calic{display:flex;flex-direction:column;width:44px;border-radius:9px;overflow:hidden;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.15);border:1.5px solid #E2E8F0}
+.calic b{background:#E5505C;color:#fff;font:800 11px/16px "Baloo 2",sans-serif;text-transform:uppercase;letter-spacing:.5px;text-align:center}
+.calic i{font:800 22px/28px "Baloo 2",sans-serif;font-style:normal;color:#1D2A44;text-align:center}
+.tutcard{background:#FFF1CC;color:#5A3E1B;border-radius:14px;padding:10px 12px;margin:6px 0 10px;font-size:15px;line-height:1.4}
+.tutcard b{color:#3D2A10}
+.skiptut{display:block;margin:10px auto 0;background:none;border:none;color:var(--muted);font:700 14px Nunito,sans-serif;text-decoration:underline;cursor:pointer;grid-column:1/-1;grid-row:5}
+
+.story{text-align:center}
+.story-art{position:relative;height:150px;margin:6px auto 4px;max-width:300px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.sa-floe{width:86%;height:auto;min-height:18px;display:flex;align-items:flex-end;justify-content:center;gap:4%;border-bottom:16px solid #F4FBFF;border-radius:0 0 10px 10px;transform-origin:50% 100%;transition:transform .6s cubic-bezier(.3,1.5,.5,1);position:relative;z-index:1}
+.sa-p svg{width:100%;height:auto;display:block}
+.story-art.tip .sa-floe{justify-content:flex-end;transform:rotate(11deg)}
+.story-art.tip .sa-p{animation:slide 1.6s ease-in-out infinite alternate}
+@keyframes slide{to{transform:translateX(6px)}}
+.sa-rock{width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-bottom:22px solid #7FA6C2;margin-top:-2px}
+.sa-water{width:100%;height:14px;margin-top:-6px;opacity:.7;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='11' viewBox='0 0 40 11'%3E%3Cpath d='M0 5 Q10 0 20 5 T40 5 V11 H0Z' fill='%234FA6DD'/%3E%3C/svg%3E") repeat-x 0 0/40px 11px;animation:drift 6s linear infinite}
+#storyText{font-size:17px;line-height:1.5;margin:10px 4px 12px}
+#storyDots{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+#storyDots i{width:8px;height:8px;border-radius:50%;background:var(--ice-edge)}
+#storyDots i.on{background:var(--sea);width:22px;border-radius:999px}
+.floebox{background:var(--ice);border-radius:14px;padding:10px 12px;margin:4px 0 10px;text-align:left}
+.floebox h3{font-size:19px;margin-bottom:4px}
+.linkbtn{background:none;border:none;color:var(--sea);font-weight:800;padding:0;cursor:pointer;text-decoration:underline;font-size:15px}
+@media (prefers-reduced-motion:reduce){.story-art .sa-p,.sa-water{animation:none}}
+
+#setBtn{background:var(--surface);border:none;border-radius:999px;width:38px;height:38px;cursor:pointer;font-size:18px}
+body.ingame #setBtn{display:none}
+.setgroup{background:var(--surface);border-radius:20px;padding:6px 14px 8px;margin:14px 0}
+.setgroup h3{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:8px 0 2px}
+.setrow{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:none;border-top:1px solid var(--ice-edge);padding:13px 2px;font:700 16px Nunito,sans-serif;color:var(--ink);cursor:pointer;text-align:left}
+.setgroup h3+.setrow{border-top:none}
+.setrow b{color:var(--sea);font-weight:800}
+.charity{background:linear-gradient(160deg,#FFF6E0,#FFE3B8);color:#4A3418;border-radius:22px;padding:16px;margin:14px 0;text-align:center}
+.charity h3{font-size:22px;margin:4px 0}
+.charity p{margin:6px 0 12px;line-height:1.45}
+.charity .btn{display:inline-block;text-decoration:none;color:#fff !important;background:#E5505C}
+.charart{display:flex;justify-content:center;align-items:flex-end;gap:6px}
+.charart svg{width:54px;height:auto}
+.charart .heart{color:#E5505C;font-size:22px;margin-bottom:26px}
+.about{margin:8px 0;line-height:1.45}
+
+/* iOS parity */
+.gold{background:linear-gradient(180deg,#FFE58A 0%,#FFC93C 45%,#E5960F 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 1px 0 rgba(122,70,0,.35))}
+.igloo{left:0;right:0;bottom:0;top:6%}
+.igloo svg{height:100%;width:100%}
+.slot.piv.has .igloo{opacity:1}
+
+button.hbar{border:none;width:100%;padding:0;cursor:pointer;font:inherit;color:inherit;display:block}
+.stage{position:relative}
+.bigpeng{border:none;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.bigpeng.wig{animation:pwig .5s ease}
+.bigpeng.gig{animation:pgig .7s ease}
+.bigpeng.huff{animation:phuff .5s ease}
+@keyframes pwig{25%{transform:rotate(-6deg)}50%{transform:rotate(5deg)}75%{transform:rotate(-3deg)}}
+@keyframes pgig{20%{transform:scale(1.12,.86)}40%{transform:scale(.9,1.12) rotate(-6deg)}60%{transform:scale(1.05,.95) rotate(6deg)}80%{transform:rotate(-3deg)}}
+@keyframes phuff{30%{transform:translateY(4px) scale(1.05,.94)}}
+/* Sized to the penguin, so the puff below can be positioned against the penguin rather than
+   against the whole stage — which also holds the floe and the water, and is full width, so
+   `right:16%` of it landed way off to the side of him. */
+.streakline{grid-column:1/-1;text-align:center;font:800 13px Nunito,sans-serif;color:var(--muted);margin-top:-6px}
+/* The gift chests, and the fishing hole that opens above Pip. */
+.chestrow{display:flex;gap:10px;justify-content:center;margin:14px 0}
+.chest{position:relative;width:84px;height:72px;border:none;background:none;cursor:pointer;padding:0}
+.chest .lid,.chest .box{position:absolute;left:0;right:0}
+.chest .box{bottom:0;height:46%;background:linear-gradient(#C08A4A,#8E6230);border-radius:7px}
+.chest .box::after{content:"";position:absolute;left:42%;top:0;bottom:0;width:16%;background:#F0C14B}
+.chest .lid{top:18%;height:34%;background:linear-gradient(#DCA463,#C08A4A);border-radius:18px 18px 3px 3px;transform-origin:50% 0;transition:transform .34s cubic-bezier(.3,1.4,.5,1),top .34s ease}
+.chest .lid::after{content:"";position:absolute;left:42%;top:0;bottom:0;width:16%;background:#F0C14B}
+.chest.shut .lid{animation:chestrock 1.1s ease-in-out infinite alternate}
+.chest.open .lid{transform:perspective(120px) rotateX(-55deg);top:2%}
+.chest.open .box::before{content:"";position:absolute;left:5%;right:5%;top:-34%;height:40%;background:#3A2411;border-radius:5px}
+@keyframes chestrock{to{transform:rotate(-6deg)}}
+.prize{position:absolute;left:50%;top:-6px;transform:translate(-50%,10px) scale(.3);opacity:0;font:800 15px "Baloo 2",sans-serif;color:var(--ink);text-align:center;transition:all .42s cubic-bezier(.3,1.5,.5,1);filter:drop-shadow(0 0 10px rgba(255,233,168,.95))}
+.chest.open .prize{transform:translate(-50%,-44px) scale(1);opacity:1}
+.hole{position:absolute;left:62%;top:-6%;width:62px;height:24px;border:none;background:none;padding:0;cursor:pointer;z-index:2}
+.hole i{position:absolute;inset:0;border-radius:50%;background:var(--sea);border:2px solid var(--ice-edge);display:block}
+.hole b{position:absolute;left:50%;top:50%;width:30px;height:12px;margin:-6px 0 0 -15px;border:1.6px solid rgba(255,255,255,.55);border-radius:50%;animation:ripple 1.9s linear infinite}
+.hole b:nth-of-type(2){animation-delay:.95s}
+@keyframes ripple{to{width:76px;height:30px;margin:-15px 0 0 -38px;border-color:transparent}}
+.hole .catch{position:absolute;left:50%;top:-30px;transform:translateX(-50%);white-space:nowrap;background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 10px;font:800 15px "Baloo 2",sans-serif}
+.rod{position:absolute;left:58%;top:18%;width:3px;height:54px;background:#8A5A2B;border-radius:2px;transform-origin:50% 100%;transform:rotate(34deg);z-index:1}
+.line{position:absolute;left:62%;top:6%;width:70px;height:46px;z-index:1;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.chest.shut .lid,.hole b{animation:none}}
+.mascotwrap{position:relative;display:inline-block;width:min(54vw,220px);line-height:0}
+.mascotwrap .bigpeng{width:100%}
+.puff{position:absolute;top:0;right:-4%;z-index:3;background:#fff;color:#1D2A44;font:800 17px "Baloo 2",sans-serif;padding:4px 12px;border-radius:16px;box-shadow:0 3px 10px rgba(0,0,0,.25);opacity:0;pointer-events:none}
+.puff.show{animation:puffin 1.8s ease forwards}
+@keyframes puffin{0%{opacity:0;transform:translateY(8px) scale(.8)}15%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}
+.stagefloe{background:linear-gradient(180deg,#FFFFFF 0%,#EAF6FC 70%,#D4ECF7 100%) !important;box-shadow:0 6px 0 #93C4DE,inset 0 -3px 0 #CFE6F2 !important}
+#splash{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:linear-gradient(180deg,#2C7DB4,#1A5583);color:#fff;transition:opacity .45s}
+#splash.out{opacity:0;pointer-events:none}
+.sp-in{text-align:center}
+.sp-art{width:130px;margin:0 auto 10px;animation:idle 2.4s ease-in-out infinite}
+.sp-art svg{width:100%;height:auto;display:block}
+.sp-in h1{font:800 46px/1 "Baloo 2",sans-serif;margin:0;text-shadow:0 3px 0 rgba(0,0,0,.2)}
+.sp-in p{margin:8px 0 0;font:700 15px Nunito,sans-serif;opacity:.85;letter-spacing:.5px}
+@media (prefers-reduced-motion:reduce){.bigpeng.wig,.bigpeng.gig,.bigpeng.huff,.sp-art{animation:none}}
+</style>
+</head>
+<body>
+<div id="splash" role="presentation"><div class="sp-in"><div class="sp-art"></div><h1>Penguzzle</h1><p>by Kurtesy Games</p></div></div>
+<header class="top">
+  <button id="pauseBtn" aria-label="Pause"><span><i></i><i></i></span></button>
+  <button id="back" hidden>‹ Home</button>
+  <div class="tt"><h1 id="title"></h1><span id="timer"></span></div>
+  <div class="rgrp">
+    <button id="helpBtn" aria-label="How to play">?</button>
+    <button id="fishBtn" aria-label="Fish and shop">🐟 <b id="fishN">0</b></button>
+    <button id="snd" aria-label="Sound on">🔊</button>
+    <button id="setBtn" aria-label="Settings">⚙️</button>
+  </div>
+</header>
+
+<main class="wrap" id="home"></main>
+<main class="wrap" id="levels" hidden></main>
+
+<main class="wrap" id="game" hidden>
+  <div id="twistbox"></div>
+  <div id="rules" hidden></div>
+  <div id="hud"></div>
+  <div id="board"></div>
+  <p id="msg" role="status"></p>
+  <div class="actions">
+    <button class="btn" id="newBtn">New puzzle</button>
+    <button class="btn" id="hintBtn">Hint</button>
+    <button class="btn ghost" id="clearBtn">Clear</button>
+    <button class="btn ghost" id="autoBtn" aria-pressed="true">Auto ✕: On</button>
+    <button class="btn ghost" id="curBtn" aria-pressed="false">Current weight: Off</button>
+    <button class="btn ghost" id="revealBtn">Show answer</button>
+    <button class="btn ghost" id="giveupBtn" hidden>Give up</button>
+    <button class="btn" id="devBtn" hidden>Auto-complete (test)</button>
+  </div>
+  <div class="pubar" id="pubar" hidden></div>
+  <section class="sandbox" id="sandbox">
+    <h2>Sandbox</h2>
+    <p class="sub">Change the rules, then tap New puzzle to try them.</p>
+    <div id="controls"></div>
+    <dl class="stats" id="stats"></dl>
+  </section>
+</main>
+
+<div class="sheetbg" id="win" hidden><button id="winBack" aria-hidden="true">Tap anywhere to go back</button>
+  <div class="sheet" role="dialog" aria-labelledby="winH">
+    <button id="winEye" aria-label="See the solved puzzle" title="See the solved puzzle">👁</button>
+    <div id="winMascot"></div>
+    <h2 id="winH">Solved!</h2>
+    <p id="winTime"></p>
+    <p id="winExtra"></p>
+    <p id="winCoins" class="coins-earned"></p>
+    <div id="rateWrap"><p>How fun was that one?</p><div class="rate" id="rate"></div></div>
+    <pre id="shareText" hidden></pre>
+    <div class="btnrow">
+      <button class="btn" id="winNext">Next puzzle</button>
+      <button class="btn" id="shareBtn">Share</button>
+      <button class="btn ghost" id="winClose">Back to board</button>
+      <button class="btn ghost" id="winRetry" hidden>Retry</button>
+      <button class="btn ghost" id="winHome" hidden>Home</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="sheetbg" id="pause" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="pauseH">
+    <h2 id="pauseH">Paused</h2>
+    <div class="pausegrid">
+      <button class="btn" id="resumeBtn">Resume</button>
+      <button class="btn ghost" id="pHelp">How to play</button>
+      <button class="btn ghost" id="pSnd">Sound: On</button>
+      <button class="btn ghost" id="pHome">Home</button>
+    </div>
+  </div>
+</div>
+<div class="sheetbg" id="story" hidden>
+  <div class="sheet story" role="dialog" aria-label="Pip’s story">
+    <div id="storyArt"></div>
+    <p id="storyText"></p>
+    <div id="storyDots"></div>
+    <button class="btn" id="storyNext">Next</button>
+    <button class="skiptut" id="storySkip">Skip story</button>
+  </div>
+</div>
+<div class="sheetbg" id="help" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="helpH">
+    <h2 id="helpH">How to play</h2>
+    <div id="helpBody"></div>
+    <div class="btnrow"><button class="btn" id="helpClose">Got it</button><button class="btn ghost" id="helpTut">Replay the tutorial</button></div>
+  </div>
+</div>
+<div class="sheetbg" id="dailyDone" hidden>
+  <div class="sheet" role="dialog" aria-label="Daily solved">
+    <div id="ddBody"></div>
+    <div class="btnrow"><button class="btn" id="ddShare">Share</button><button class="btn ghost" id="ddPlay">Play again</button><button class="btn ghost" id="ddArch">Archive</button><button class="btn ghost" id="ddClose">Close</button></div>
+  </div>
+</div>
+<div class="sheetbg" id="buy" hidden>
+  <div class="sheet" role="dialog" aria-label="Get power-ups">
+    <div id="buyBody"></div>
+    <button class="btn ghost" id="buyClose">Close</button>
+  </div>
+</div>
+<div class="sheetbg" id="gift" hidden>
+  <div class="sheet" role="dialog" aria-label="Your daily gift">
+    <h2>Your daily gift</h2>
+    <div id="giftBody"></div>
+    <button class="btn ghost" id="giftClose">Close</button>
+  </div>
+</div>
+<div class="sheetbg" id="store" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="storeH">
+    <h2 id="storeH">🐟 Fish Shop</h2>
+    <p id="storeMsg"></p>
+    <p>You have <b id="storeN">0</b> fish.</p>
+    <div class="packs">
+      <button class="pack" data-buy="500"><span class="pf">🐟 500</span><span class="pp">$0.99</span></button>
+      <button class="pack" data-buy="1200"><span class="pf">🐟 1,200</span><span class="pp">$1.99</span></button>
+      <button class="pack" data-buy="3500"><span class="pf">🐟 3,500</span><span class="pp">$4.99</span></button>
+    </div>
+    <p class="note" style="margin-top:0">Test mode: no real money is charged.</p>
+    <h3>Power-ups</h3>
+    <ul class="pulist" id="pulist"></ul>
+    <h3>Earn fish for free</h3>
+    <p style="font-size:14px">Each new level pays 10 to 30 fish (double on ⚡ spike levels), plus 5 if you use no power-ups. The Daily pays 25 plus a streak bonus. Every new level star pays 5. Every 5th level opens a reward chest with free power-ups, and every Daily solve gives one too.</p>
+    <button class="btn ghost" id="storeClose">Close</button>
+  </div>
+</div>
+
+<script>
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+let RNG = Math.random;
+const rnd = n => Math.floor(RNG()*n);
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function withSeed(seed,fn){ const old=RNG; if(seed!=null) RNG=mulberry32(seed); try{ return fn(); } finally{ RNG=old; } }
+const load=(k,d)=>{ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } };
+const save=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];} return a; };
+const range = n => [...Array(n).keys()];
+const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+const pop = m => { let c=0; while(m){ c+=m&1; m>>=1; } return c; };
+function comb(arr,k,cb){ const pick=[]; let stop=false;
+  (function go(s){ if(stop) return; if(pick.length===k){ if(cb(pick)) stop=true; return; }
+    for(let i=s;i<arr.length;i++){ pick.push(arr[i]); go(i+1); pick.pop(); if(stop) return; } })(0); }
+
+const COLORS = ['#3D7DD8','#E8618C','#24A06A','#8A63D2','#F28C28','#18A3A8'];
+function pengInner(color='#3D7DD8', o={}){
+  const belly=o.belly||'#fff', cheek=o.cheek||'#FF8FA3', fat=o.fat||0;
+  const rx=15+6*fat, C=rx+5, brx=10.5+5*fat, ck=9.5+3*fat;
+  const bl=o.blush, crx=bl==null?2.6:2.2+1.8*bl, cry=bl==null?1.5:1.2+1*bl, cop=bl==null?.75:.3+.65*bl;
+  return {vw:2*C, g:`
+  <ellipse cx="${C-6-fat*2}" cy="42.5" rx="5" ry="2.5" fill="#FF9A3C"/><ellipse cx="${C+6+fat*2}" cy="42.5" rx="5" ry="2.5" fill="#FF9A3C"/>
+  <ellipse cx="${C-rx+.5}" cy="27" rx="3.5" ry="8" fill="${color}" transform="rotate(18 ${C-rx+.5} 27)"/>
+  <ellipse cx="${C+rx-.5}" cy="27" rx="3.5" ry="8" fill="${color}" transform="rotate(-18 ${C+rx-.5} 27)"/>
+  <ellipse cx="${C}" cy="25" rx="${rx}" ry="17" fill="${color}"/>
+  ${o.mood==='fishing'
+    /* Turned around: same silhouette, no face and no pale belly — the belly is what reads as
+       "front". The bucket hat is what says fishing rather than sulking, and its brim is drawn
+       wider than the head is at that height or it reads as a swimming cap. */
+    ? `<ellipse cx="${C}" cy="38" rx="4.5" ry="2.2" fill="#1D2A44" opacity=".18"/>
+       <path d="M${C} 20 V36" stroke="#1D2A44" stroke-width="1.4" stroke-linecap="round" opacity=".12"/>
+       <ellipse cx="${C}" cy="8.6" rx="${rx*.6}" ry="6.2" fill="#8A9A5B"/>
+       <ellipse cx="${C}" cy="12.4" rx="${rx*.62}" ry="2" fill="#C58B4A"/>
+       <ellipse cx="${C}" cy="13.6" rx="${rx*.97}" ry="2.9" fill="#74834B"/>
+       <ellipse cx="${C}" cy="12.9" rx="${rx*.9}" ry="1.1" fill="#fff" opacity=".18"/>`
+    : `<ellipse cx="${C}" cy="31" rx="${brx}" ry="10.5" fill="${belly}"/>`}
+  ${o.mood==='fishing' ? '' : o.mood==='grumpy'
+    ? `<path d="M${C-8.2} 17.4 h5 M${C+3.2} 17.4 h5" stroke="#1D2A44" stroke-width="2.2" stroke-linecap="round"/><path d="M${C-9} 11.4 L${C-3.4} 14 M${C+9} 11.4 L${C+3.4} 14" stroke="#1D2A44" stroke-width="1.7" stroke-linecap="round"/>`
+    : o.mood==='happy'
+    ? `<path d="M${C-8} 17.8 q2.5 -3.8 5 0 M${C+3} 17.8 q2.5 -3.8 5 0" stroke="#1D2A44" stroke-width="1.9" fill="none" stroke-linecap="round"/>`
+    : `<circle cx="${C-5.5}" cy="17" r="2.3" fill="#1D2A44"/><circle cx="${C+5.5}" cy="17" r="2.3" fill="#1D2A44"/>
+  <circle cx="${C-4.7}" cy="16.2" r=".8" fill="#fff"/><circle cx="${C+6.3}" cy="16.2" r=".8" fill="#fff"/>`}
+  ${o.mood==='worried'?`<path d="M${C-8.5} 13.6 L${C-3.6} 11.8 M${C+8.5} 13.6 L${C+3.6} 11.8" stroke="#1D2A44" stroke-width="1.4" stroke-linecap="round"/>`:''}
+  <ellipse cx="${C-ck}" cy="21.5" rx="${crx}" ry="${cry}" fill="${cheek}" opacity="${cop}"/><ellipse cx="${C+ck}" cy="21.5" rx="${crx}" ry="${cry}" fill="${cheek}" opacity="${cop}"/>
+  <path d="M${C-3.2} 20.5 L${C+3.2} 20.5 L${C} 24.5 Z" fill="#FF9A3C"/>
+  ${o.hot||o.mood==='worried'?`<path d="M${C+13} 6 q3 4 0 7 q-3 -3 0 -7z" fill="#5FB8EC"/>`:''}`};
+}
+function peng(color='#3D7DD8', o={}){ const p=pengInner(color,o); return `<svg class="peng" viewBox="0 0 ${p.vw} 46" aria-hidden="true">${p.g}</svg>`; }
+const chick = (m) => peng('#FFC93C',{belly:'#FFF1B8',mood:m});
+const emperor = (m) => peng('#2E3A5C',{belly:'#FFF6E0',cheek:'#FFC93C',fat:.7,mood:m});
+const chonk = (w,m) => peng(w===5?'#E8A23B':'#18A3A8',{belly:'#FFF6E0',cheek:'#FF8FA3',fat:w===5?1.6:1.2,mood:m});
+const floaty = (m) => { const p=pengInner('#9B8CE8',{belly:'#F3EEFF',mood:m}); return `<svg viewBox="0 0 40 64" aria-hidden="true">
+  <g class="bal"><path d="M27 19 Q31 31 34 41" stroke="#9AA6B8" stroke-width="1.2" fill="none"/>
+  <ellipse cx="27" cy="10" rx="8.5" ry="9.5" fill="#FF5A6E"/><path d="M25 19 l2 2.5 l2 -2.5z" fill="#FF5A6E"/>
+  <ellipse cx="24" cy="6.5" rx="2" ry="3.2" fill="#fff" opacity=".55"/></g>
+  <g transform="translate(0 18)">${p.g}</g></svg>`; };
+const egg = () => `<svg viewBox="0 0 30 36" aria-hidden="true"><ellipse cx="15" cy="20" rx="11" ry="14" fill="#FFF8EC" stroke="#E2CFAE" stroke-width="1.5"/><circle cx="11" cy="15" r="1.8" fill="#8FC9E8"/><circle cx="18" cy="22" r="2.2" fill="#8FC9E8"/><circle cx="13" cy="27" r="1.4" fill="#8FC9E8"/><circle cx="19" cy="12" r="1.2" fill="#8FC9E8"/></svg>`;
+const berg = () => `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M3 33 L13 12 L19 18 L27 5 L37 33 Z" fill="#FFFFFF" stroke="#7FC0E2" stroke-width="1.5" stroke-linejoin="round"/><path d="M27 5 L30 33 L37 33 Z" fill="#CDEBF7"/><path d="M1 34 q5 -3 10 0 t10 0 t10 0 t9 0" fill="none" stroke="#2C7DB4" stroke-width="2"/></svg>`;
+const twinsSVG = (m) => { const p=pengInner('#F07FA8',{belly:'#FFF0F6',mood:m}); return `<svg viewBox="0 0 92 50" aria-hidden="true">
+  <g transform="translate(3 4)">${p.g}</g><g transform="translate(49 4)">${p.g}</g>
+  <ellipse cx="45.5" cy="31" rx="5" ry="3.2" fill="#F07FA8"/>
+  <path d="M45.5 4 c-2 -3 -6 -1 -4 2 l4 4 l4 -4 c2 -3 -2 -5 -4 -2z" fill="#FF5A6E"/></svg>`; };
+const whamSVG = (m) => `<svg viewBox="0 0 92 40" aria-hidden="true">
+  <path d="M2 30 l-2 -6 M4 24 l-1 -6 M88 30 l3 -6 M86 24 l2 -6" stroke="#7FC8EE" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="46" cy="27" rx="40" ry="11" fill="#4B3FA8"/><ellipse cx="48" cy="30" rx="30" ry="7" fill="#fff"/>
+  <ellipse cx="14" cy="32" rx="8" ry="3" fill="#4B3FA8" transform="rotate(-15 14 32)"/><ellipse cx="78" cy="32" rx="8" ry="3" fill="#4B3FA8" transform="rotate(15 78 32)"/>
+  <path d="M12 21 l4 2 l-4 2 M24 21 l-4 2 l4 2" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <path d="M18 27 L22 27 L20 30 Z" fill="#FF9A3C"/>
+  <text x="56" y="13" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="12" fill="#FF9A3C" transform="rotate(-6 56 13)">WHAM!</text></svg>`;
+const snoozySVG = (m) => `<svg viewBox="0 0 92 40" aria-hidden="true">
+  <ellipse cx="84" cy="31" rx="3" ry="6" fill="#FF9A3C" transform="rotate(70 84 31)"/><ellipse cx="80" cy="35" rx="3" ry="6" fill="#FF9A3C" transform="rotate(80 80 35)"/>
+  <ellipse cx="50" cy="27" rx="34" ry="11" fill="#5BAE8C"/><ellipse cx="52" cy="30" rx="25" ry="7" fill="#fff"/>
+  <circle cx="20" cy="22" r="15" fill="#5BAE8C"/><ellipse cx="22" cy="26" rx="9" ry="7" fill="#fff"/>
+  <path d="M12 20 q3 2.5 6 0 M22 20 q3 2.5 6 0" stroke="#1D2A44" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  <path d="M5 23 L-1 25.5 L5 28 Z" fill="#FF9A3C"/>
+  <path d="M10 9 q8 -9 18 -1 l-3 4 q-6 -5 -12 1z" fill="#E8618C"/><circle cx="29" cy="7" r="2.6" fill="#fff"/>
+  <text class="zz" x="40" y="10" font-family="Baloo 2, sans-serif" font-weight="800" font-size="11" fill="#7FB6E6">z</text>
+  <text class="zz z2" x="49" y="5" font-family="Baloo 2, sans-serif" font-weight="800" font-size="8" fill="#7FB6E6">z</text></svg>`;
+const pairCell = (code,m) => { const flip=code===18, art=code===11?whamSVG(m):code===7?twinsSVG(m):snoozySVG(m);
+  const badge=code===11?['wham','2+2']:code===7?['twin','1+1']:['snzb',code===16?'2+1':'1+2'];
+  return `<span class="snz${flip?' flip':''}">${art}</span><b class="wb ${badge[0]}">${badge[1]}</b>`; };
+const pairMini = (code) => `<i class="mini" style="width:46px;height:30px"><i style="width:100%">${code===11?whamSVG():code===7?twinsSVG():snoozySVG()}</i></i>`;
+const boxySVG = (open) => `<svg viewBox="0 0 44 46" aria-hidden="true">
+  ${open?'<path d="M5 18 L-1 8 L15 12 Z M39 18 L45 8 L29 12 Z" fill="#B98348"/>':''}
+  <circle cx="22" cy="${open?12:15}" r="9" fill="#2E3A5C"/><ellipse cx="22" cy="${open?14:17}" rx="6" ry="4" fill="#FFF6E0"/>
+  <circle cx="18.5" cy="${open?10:13}" r="1.8" fill="#1D2A44"/><circle cx="25.5" cy="${open?10:13}" r="1.8" fill="#1D2A44"/>
+  <circle cx="19" cy="${open?9.4:12.4}" r=".6" fill="#fff"/><circle cx="26" cy="${open?9.4:12.4}" r=".6" fill="#fff"/>
+  <path d="M20 ${open?14:17} L24 ${open?14:17} L22 ${open?16.5:19.5} Z" fill="#FF9A3C"/>
+  <rect x="5" y="18" width="34" height="26" rx="3" fill="#D3A06A"/><rect x="5" y="18" width="34" height="5" fill="#B98348"/>
+  ${open?'':'<text x="22" y="40" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="16" fill="#7A5226">?</text>'}
+</svg>`;
+const boxyCell = (v, openW) => `<span style="display:block;width:100%">${boxySVG(!!openW)}</span><b class="wb ${v>20||openW?'':'q'}">${openW||(v>20?v-20:'?')}</b>`;
+const SIZE = {1:.42, 2:.6, 3:1, 6:.6, 14:1.12, 15:1.2, 20:1};
+const artOf = (v,m) => v===1?chick(m):v===2?peng('#3D7DD8',{mood:m}):v===3?emperor(m):v===6?floaty(m):v>=20?boxySVG(false):chonk(v-10,m);
+const mini = (v,px,cls='') => `<i class="mini ${cls}" style="width:${px}px;height:${px}px"><i style="width:${SIZE[v]*100}%">${artOf(v)}</i></i>`;
+const animal = (v,m) => { const art = artOf(v,m);
+  const badge = v===6?'<b class="wb neg">−1</b>':v>=10?`<b class="wb">${v-10}</b>`:(v>=1&&v<=3)?`<b class="wb c${v}">${v}</b>`:'';
+  return `<span style="display:block;width:${SIZE[v]*100}%">${art}</span>${badge}`; };
+
+/* ---------- playtest log ---------- */
+function loadLog(){ try{ return JSON.parse(localStorage.getItem('floe-log')||'{}'); }catch(e){ return {}; } }
+function saveLog(l){ try{ localStorage.setItem('floe-log', JSON.stringify(l)); }catch(e){} }
+
+/* =========================================================
+   GAME 2: TIPPY FLOE
+   grid values: 0 empty, 1 chick, 2 penguin, 3 emperor, 4 ✕, 5 auto ✕,
+   6 Floaty (−1), 7/8 Twins left/right (1 each), 11/12 WHAM left/right (2 each),
+   14 Chonk (4), 15 Mega Chonk (5), 20 Boxy unguessed, 21–25 Boxy guessed 1–5
+   placements: [chick, penguin, emperor, floaty|-1, boxWeight|0, boxCol|-1, pairLeft|-1, pairUnit]
+   ========================================================= */
+const wt = v => (v>=1&&v<=3) ? v : v===6 ? -1 : (v===7||v===8||v===17||v===18) ? 1 : (v===11||v===12||v===16||v===19) ? 2 : v>=20 ? (v>20?v-20:0) : v>=10 ? v-10 : 0;
+// pair pieces cover two side-by-side squares: [left weight, right weight, left code] (right code = left code + 1)
+const PAIRS = { twins:[[1,1,7]], wham:[[2,2,11]], snoozy:[[2,1,16],[1,2,18]] };
+const PAIR_L = [7,11,16,18], PAIR_R = [8,12,17,19], PAIR_ALL=[...PAIR_L,...PAIR_R];
+const pairName = v => (v===7||v===8)?'Twins':(v===11||v===12)?'WHAM':'Snoozy';
+const isAnimal = v => v>=1&&v<=3;
+const NAME = {1:'chick',2:'Pip',3:'emperor',6:'Floaty',7:'Twins',11:'WHAM',16:'Snoozy',18:'Snoozy'};
+/* Pip is the one piece whose name is a name. Every other kind takes "the", and the hint
+   engine has always written "the ${NAME[w]}" — which the rename turned into "the Pip", which
+   is how nobody refers to him, the story card that introduces him included.
+   aNAME also fixes "a emperor", shipping in the tutorial prompt since before the rename. */
+const theNAME = w => NAME[w]==='Pip' ? 'Pip' : `the ${NAME[w]}`;
+const aNAME = w => NAME[w]==='Pip' ? 'Pip' : `${'aeiou'.includes(NAME[w][0].toLowerCase())?'an':'a'} ${NAME[w]}`;
+const IDXV = [1,2,3,6];
+let TV=[1,2,3]; const MONO=()=>TV[0]===TV[1];
+const iv = i => i<3 ? TV[i] : 6;
+const trioDone = g => [1,2,3].every(w=>g.filter(x=>x===w).length===TV.filter(x=>x===w).length);
+const TWIST_PRESETS = {
+  chonk:{name:'Chonk',fixed:[4]},
+  mega:{name:'Mega Chonk',fixed:[5]},
+  floaty1:{name:'Floaty',balloons:1},
+  floaty2:{name:'Double Floaty',balloons:2},
+  twins:{name:'Twins',twins:1},
+  wham:{name:'WHAM',wham:1},
+  snoozy:{name:'Snoozy',snoozy:1},
+  boxyfloaty:{name:'Boxy & Floaty',box:true,balloons:1},
+  boxy:{name:'Boxy',box:true},
+  showsat:{name:'Showdown Saturday',fixed:[4],twins:1,balloons:1},
+  showsun:{name:'Showdown Sunday',fixed:[5],box:true,wham:1,balloons:1},
+  showsatB:{name:'Showdown Saturday',fixed:[5],snoozy:1,balloons:1},
+  showsunB:{name:'Showdown Sunday',fixed:[4],box:true,snoozy:1,balloons:1}
+};
+/* What an unlimited level may use. Two rules: ONE kind of special at a time, never a stack,
+   and never a preset penguin (Chonk / Mega Chonk) because those arrive already placed and a
+   board that starts half-answered is the wrong shape for the endless mode. A peak used to
+   jump to a full Showdown - three or four kinds at once, one of them preset - at level 18 and
+   stay there for ever. What climbs now is the pool, not the pile. Must match
+   TwistPresets.levelPool in Twists.swift exactly, or the same seed builds two different
+   boards. See LevelRampTests. */
+const levelPool = n => n<18 ? ['twins','wham']
+                     : n<30 ? ['twins','wham','snoozy','floaty1']
+                            : ['twins','wham','snoozy','floaty1','boxy'];
+// Daily schedules alternate every other week. Sunday first (Date.getDay order).
+const WEEK_A = [
+  TWIST_PRESETS.showsun,
+  {...TWIST_PRESETS.boxy, name:'Mystery Monday'},
+  {...TWIST_PRESETS.twins, name:'Twin Tuesday'},
+  {...TWIST_PRESETS.wham, name:'WHAM Wednesday'},
+  {...TWIST_PRESETS.mega, name:'Thick Thursday'},
+  {...TWIST_PRESETS.floaty1, name:'Floaty Friday'},
+  TWIST_PRESETS.showsat
+];
+const WEEK_B = [
+  TWIST_PRESETS.showsunB,
+  {...TWIST_PRESETS.mega, name:'Mega Chonk Monday'},
+  {...TWIST_PRESETS.chonk, name:'Two-Ton Tuesday'},
+  {...TWIST_PRESETS.snoozy, name:'Wake-Up Wednesday'},
+  {...TWIST_PRESETS.boxyfloaty, name:'Thinking Thursday'},
+  {...TWIST_PRESETS.floaty2, name:'Double Floaty Friday'},
+  TWIST_PRESETS.showsatB
+];
+
+/* ---------- Appearance ---------- */
+let THEME = load('pz-theme','system');
+function applyTheme(){ const el=document.documentElement; if(THEME==='system') el.removeAttribute('data-theme'); else el.setAttribute('data-theme',THEME); }
+applyTheme();
+let AUTOX = load('pz-autox', true);
+const IGLOO = `<svg viewBox="0 0 44 44" aria-hidden="true"><path d="M3 43 V27 Q3 9 22 9 Q41 9 41 27 V43 Z" fill="#F4FBFF" stroke="#8CCBEA" stroke-width="1.6" stroke-linejoin="round"/><path d="M3.6 35 H40.4 M3.4 27 H40.6 M6.5 19 H37.5" stroke="#B9E0F2" stroke-width="1.2"/><path d="M9 35 V43 M35 35 V43 M11 27 V35 M33 27 V35 M16 19 V27 M28 19 V27 M22 11 V19" stroke="#B9E0F2" stroke-width="1.2"/><path d="M15.5 43 V35 a6.5 6.5 0 0 1 13 0 V43 Z" fill="#2C5F86"/></svg>`;
+let SHOWCUR = load('pz-showcur', false);
+
+function rowPlacements(W,p,giv,rule='off',pw=0,fx=null,bal=0,snz=0,pk=PAIRS.twins){
+  const out=[]; let ftKnown=0, boxCol=-1, gb=-1, gs=-1, gcode=0;
+  if(fx) for(const [c,w] of fx){ if(w===0) boxCol=c; else ftKnown+=w*(c-p); }
+  for(const [col,v] of giv){ if(v===6) gb=col; if(PAIR_L.includes(v)){ gs=col; gcode=v; } }
+  const blocked=c=>fx&&fx.has(c);
+  const ks = boxCol>=0 ? [1,2,3,4,5] : [0];
+  const ds = (bal!==2 && gb<0 ? [-1] : []).concat(bal>=1 ? range(W) : []);
+  for(let a=0;a<W;a++)for(let b=0;b<W;b++)for(let c=0;c<W;c++){
+    if(a===b||a===c||b===c||blocked(a)||blocked(b)||blocked(c)) continue;
+    if(MONO() && !(a<b&&b<c)) continue;
+    const tri=[a,b,c];
+    if(rule!=='off'){ const at=tri.indexOf(p); if(at<0) continue; if(pw && at!==pw-1) continue; }
+    let ok=true;
+    for(const [col,v] of giv){ if(v<=3 && (MONO() ? !tri.includes(col) : tri[v-1]!==col)){ ok=false; break; } }
+    if(!ok) continue;
+    const t0=TV[0]*(a-p)+TV[1]*(b-p)+TV[2]*(c-p)+ftKnown;
+    for(const k of ks){
+      const tk=t0+(boxCol>=0?k*(boxCol-p):0);
+      for(const d of ds){
+        if(d>=0){ if(d===p||d===a||d===b||d===c||blocked(d)||(gb>=0&&gb!==d)) continue; }
+        const t1=tk-(d>=0?d-p:0);
+        if(snz!==2 && gs<0 && t1===0) out.push([a,b,c,d,k,boxCol,-1,0,0,0]);
+        if(snz>=1) for(const [wl,wr,code] of pk){
+          if(gcode && gcode!==code) continue;
+          const tot=wl+wr, num=tot*p-wr-t1; if(num%tot!==0) continue; const s0=num/tot;
+          if(s0>=0 && s0+1<W && s0!==p && s0+1!==p && !blocked(s0) && !blocked(s0+1) && ![a,b,c,d].includes(s0) && ![a,b,c,d].includes(s0+1) && (gs<0||gs===s0))
+            out.push([a,b,c,d,k,boxCol,s0,wl,wr,code]); }
+      }
+    }
+  }
+  return out;
+}
+function addPl(acc,pl,s){
+  for(let w=0;w<3;w++) acc[pl[w]]+=s*TV[w];
+  if(pl[3]>=0) acc[pl[3]]-=s;
+  if(pl[5]>=0) acc[pl[5]]+=s*pl[4];
+  if(pl[6]>=0){ acc[pl[6]]+=s*pl[7]; acc[pl[6]+1]+=s*pl[8]; }
+}
+function tippySolve(R,W,piv,givens,colSum,rule='off',limit=2,cap=300000,fx=null,B=0,S=0,PK=PAIRS.twins){
+  const per=R/3; fx=fx||range(R).map(()=>new Map());
+  const opts=[]; for(let r=0;r<R;r++){ const o=rowPlacements(W,piv[r],givens[r],rule,0,fx[r],B?1:0,S?1:0,PK); if(!o.length) return {count:0,sols:[],steps:0}; opts.push(o); }
+  const order=range(R).sort((x,y)=>opts[x].length-opts[y].length);
+  const boxRow=range(R).find(r=>[...fx[r].values()].includes(0)); const boxRank = boxRow==null?-1:order.indexOf(boxRow);
+  const acc=new Array(W).fill(0); fx.forEach(m=>m.forEach((w,c)=>acc[c]+=w));
+  const cur=new Array(R), sols=[], cnt=[0,0,0]; let steps=0;
+  function rec(k,bu,su){
+    if(sols.length>=limit||steps>cap) return; steps++;
+    if(k===R){ if(bu!==B||su!==S) return; for(let c=0;c<W;c++) if(acc[c]!==colSum[c]) return; sols.push(cur.map(x=>x.slice())); return; }
+    const r=order[k], rem=R-k-1;
+    for(const pl of opts[r]){
+      const hb=pl[3]>=0?1:0, hs=pl[6]>=0?1:0;
+      if(bu+hb>B||su+hs>S) continue;
+      const bl=B-bu-hb, sl=S-su-hs; if(bl>rem||sl>rem) continue;
+      const pw = rule==='diff' ? pl.slice(0,3).indexOf(piv[r]) : -1;
+      if(pw>=0 && cnt[pw]>=per) continue;
+      addPl(acc,pl,1);
+      const maxAdd = 3*rem + sl*2 + (boxRank>k?5:0);
+      let ok=true; for(let c=0;c<W;c++){ const need=colSum[c]-acc[c]; if(need< -bl||need>maxAdd){ ok=false; break; } }
+      if(ok){ cur[r]=pl; if(pw>=0) cnt[pw]++; rec(k+1,bu+hb,su+hs); if(pw>=0) cnt[pw]--; }
+      addPl(acc,pl,-1);
+      if(sols.length>=limit||steps>cap) return;
+    }
+  }
+  rec(0,0,0);
+  return {count:sols.length,sols,steps,capped:steps>cap};
+}
+const twistOf = p => p.twist==null||p.twist==='none' ? null : typeof p.twist==='object' ? p.twist : TWIST_PRESETS[p.twist]||null;
+const TippyFloe = {
+  id:'tippyfloe', name:'Tippy Floe',
+  blurb:'Balance a chick, Pip and an emperor on every wobbly ice floe.',
+  icon:()=>emperor(),
+  rules:(z)=>{ const pr=z?z.rule:P.tippyfloe.prule, per=z?z.R/3:1, tw=z&&z.twist;
+    let twist='';
+    if(tw){ const parts=[];
+      (tw.fixed||[]).forEach(w=>parts.push([mini(10+w,40), w===5?'Mega Chonk':'Chonk', `weighs ${w}`, 'Already sitting on a floe. Counts toward its floe’s balance and its column.']));
+      if(tw.box) parts.push([mini(20,40),'Boxy','weighs 1 to 5','Its weight is a secret. Work it out, then tap the box to set the number.']);
+      if(tw.twins) parts.push([pairMini(7),'Twins','1 + 1','Always side by side on one floe. Tap a square to place them.']);
+      if(tw.snoozy) parts.push([pairMini(16),'Snoozy','2 + 1','Naps across two squares with a heavy head end. Tap to place, tap again to flip.']);
+      if(tw.wham) parts.push([pairMini(11),'WHAM','2 + 2','Belly-flopped across two squares. Tap a square to place it.']);
+      if(tw.balloons) parts.push([mini(6,40), tw.balloons>1?`${tw.balloons} Floaty`:'Floaty','weighs −1','Its balloon lifts its side and takes 1 off its column. One per floe.']);
+      twist=`<div class="twist"><h3>${tw.name}</h3>${parts.map(([ic,nm,wtag,tx])=>`<div class="tw"><span class="twic">${ic}</span><div><div class="twh"><b>${nm}</b><span class="chip">${wtag}</span></div><div class="twt">${tx}</div></div></div>`).join('')}<p class="twnote">Special penguins never go in an igloo.</p></div>`; }
+    const pure = z&&z.pure ? `<p class="purenote">${z.weekend?'<b>Mega Weekend:</b> one big 6-floe puzzle for all of Saturday and Sunday. Your progress saves, so come back anytime. ':''}Daily rules: no hints and no current weight. Auto ✕ only fills in finished floes. Stuck? You can give up without losing your streak.</p>` : '';
+    const extras=[z&&z.B?'Floaty':'',z&&z.S?z.pairName:''].filter(Boolean);
+    if(z) z.twistHTML=twist+pure;
+    return `${twist}${pure}<p>${z&&z.trio&&z.trio[0]===z.trio[1] ? `Every floe gets exactly three <b>${NAME[z.trio[0]]}s</b>, weighing ${z.trio[0]} each.` : 'Every floe gets exactly one of each: <b>chick</b> weighs 1, <b>Pip</b> 2, <b>emperor</b> 3.'} A floe balances when weight × distance from the ▲ is equal on both sides. The square right above the ▲ counts as zero. The ▲ turns green when a floe is level. When a floe has one of each and is level, its penguins smile, but that only means it balances. It still has to fit the column totals and the igloos.</p>
+    ${pr==='any'?'<p>The square above each ▲ is an <b>igloo</b>, and every igloo needs a chick, Pip or an emperor living in it.</p>':''}
+    ${pr==='diff'?`<p>The square above each ▲ is an <b>igloo</b>. Every igloo needs a chick, Pip or an emperor living in it, and each kind lives in exactly ${per===1?'one igloo':per+' igloos'}. The tracker above the floes keeps count.</p>`:''}
+    <p>Numbers under the board are the total weight each column needs. Tap a spot to cycle ${z&&z.trio&&z.trio[0]===z.trio[1] ? NAME[z.trio[0]] : 'chick → Pip → emperor'}${extras.map(x=>' → '+x).join('')} → empty. Press and hold (or right-click) to mark ✕ where nothing goes.</p>
+    <div class="legend"><span>${mini(1,36)}1</span><span>${mini(2,36)}2</span><span>${mini(3,36)}3</span></div>`; },
+  schema:[
+    {key:'r',label:'Floes',type:'range',min:3,max:9},
+    {key:'w',label:'Floe length',type:'seg',options:[['5','5'],['7','7'],['9','9']]},
+    {key:'pivot',label:'Balance point',type:'seg',options:[['c','Always centered'],['w','Moves around']]},
+    {key:'hints',label:'Starting animals',type:'seg',options:[['none','Just enough'],['some','A few extra'],['lots','Lots']]},
+    {key:'prule',label:'Animal in the igloo',type:'seg',options:[['off','Optional'],['any','Required'],['diff','Required, evenly mixed']]},
+    {key:'twist',label:'Special penguins',type:'seg',options:[['none','None'],['chonk','Chonk'],['mega','Mega Chonk'],['twins','Twins'],['wham','WHAM'],['snoozy','Snoozy'],['boxy','Boxy'],['floaty1','1 Floaty'],['floaty2','2 Floaty'],['showsat','Showdown Sat A'],['showsun','Showdown Sun A'],['showsatB','Showdown Sat B'],['showsunB','Showdown Sun B']]}
+  ],
+  defaults:{r:3,w:'7',pivot:'w',hints:'none',prule:'diff',twist:'none'},
+  generate(p){
+    TV = p.mono ? [p.mono,p.mono,p.mono] : [1,2,3];
+    const rule=p.prule||'off'; let R=+p.r; let W=+p.w;
+    const tw=twistOf(p), B=(tw&&tw.balloons)||0, S=(tw&&(tw.twins||tw.wham||tw.snoozy))||0, PKEY=tw&&tw.wham?'wham':tw&&tw.snoozy?'snoozy':'twins', PK=PAIRS[PKEY], FW=(tw&&tw.fixed)||[], BOX=!!(tw&&tw.box);
+    const fixedR = rule==='diff' && R%3!==0; if(rule==='diff') R=Math.max(3,R-R%3);
+    const forcedW=rule==='diff'&&W<7; if(forcedW) W=7;
+    let piv, fxTrue, fxSolve, sol, pw, boxW=0, boxRow=-1, boxCol=-1;
+    for(let attempt=0;attempt<500;attempt++){
+      pw = rule==='diff' ? shuffle(range(R).map(i=>i%3+1)) : null;
+      piv=[];
+      for(let r=0;r<R;r++){ let pv, tries=0;
+        do{ pv = p.pivot==='c'?Math.floor(W/2):1+rnd(W-2); tries++; } while(!rowPlacements(W,pv,new Map(),rule,pw?pw[r]:0).length && tries<300);
+        piv.push(pv); }
+      fxTrue=range(R).map(()=>new Map());
+      const items=FW.slice(); if(BOX) items.push('box');
+      const fr=shuffle(range(R)).slice(0,items.length);
+      boxRow=-1; boxCol=-1; boxW=0;
+      items.forEach((w,i)=>{ const r=fr[i], cols=range(W).filter(c=>c!==piv[r]); const c=cols[rnd(cols.length)];
+        if(w==='box'){ boxW=1+rnd(5); boxRow=r; boxCol=c; fxTrue[r].set(c,boxW); } else fxTrue[r].set(c,w); });
+      const br=new Set(shuffle(range(R)).slice(0,B)), sr=new Set(shuffle(range(R)).slice(0,S));
+      sol=[]; let ok=true;
+      // Don't let two look-alike floes get the same answer.
+      //
+      // Floes with the same pivot and nothing placed on either are interchangeable: swapping
+      // two whole rows leaves every column total untouched and the torque identical. If their
+      // answers differ, the swap is a second valid board and the reveal loop below hands out a
+      // starter to rule it out — which also makes the two look different. But if the answers
+      // happen to MATCH, the swap changes nothing, the board is still unique, and the player
+      // gets the second floe free once they've solved the first. That hit a third of levels.
+      //
+      // Banning every earlier look-alike's arrangement pushes each pair down the first path.
+      // Deliberately not requiring distinct pivots, because nine floes over seven columns
+      // can't have them. The last fifth of the attempts drop the ban: on a narrow mono section
+      // there may be only one balanced arrangement to go round, and falling out of this loop
+      // with a half-built solution crashes a few seeds later.
+      const banLookAlikes = attempt < 400;
+      for(let r=0;r<R;r++){
+        const o=rowPlacements(W,piv[r],new Map(),rule,pw?pw[r]:0,fxTrue[r],br.has(r)?2:0,sr.has(r)?2:0,PK);
+        if(!o.length){ ok=false; break; }
+        const same=(a,b)=>a.length===b.length&&a.every((v,i)=>v===b[i]);
+        const twins = !banLookAlikes ? [] : range(r).filter(q =>
+          piv[q]===piv[r] && !fxTrue[q].size && !fxTrue[r].size
+          && br.has(q)===br.has(r) && sr.has(q)===sr.has(r));
+        const choices = twins.length ? o.filter(x => !twins.some(q => same(x, sol[q]))) : o;
+        if(!choices.length){ ok=false; break; }
+        sol.push(choices[rnd(choices.length)]);
+      }
+      if(ok) break;
+    }
+    fxSolve=fxTrue.map((m,r)=>{ const n=new Map(m); if(r===boxRow) n.set(boxCol,0); return n; });
+    const colSum=new Array(W).fill(0); sol.forEach(pl=>addPl(colSum,pl,1)); fxTrue.forEach(m=>m.forEach((w,c)=>colSum[c]+=w));
+    const givens=piv.map(()=>new Map()); let res;
+    const slots=r=>[[0,TV[0]],[1,TV[1]],[2,TV[2]],[3,6],[6,sol[r][9]]].filter(([i])=>sol[r][i]>=0);
+    for(let it=0;it<90;it++){
+      res=tippySolve(R,W,piv,givens,colSum,rule,2,400000,fxSolve,B,S,PK);
+      if(res.count===1&&!res.capped) break;
+      let cands=[];
+      if(res.sols.length>=2){ const same=(x,r)=>[0,1,2,3,6].every(i=>x[r][i]===sol[r][i]);
+        const alt=res.sols.find(s=>s.some((_,r)=>!same(s,r)))||res.sols[1];
+        for(let r=0;r<R;r++) for(const [i,v] of slots(r)) if(alt[r][i]!==sol[r][i]) cands.push([r,i,v]); }
+      cands=cands.filter(([r,i])=>!givens[r].has(sol[r][i]));
+      if(!cands.length) for(let r=0;r<R;r++) for(const [i,v] of slots(r)) if(!givens[r].has(sol[r][i])) cands.push([r,i,v]);
+      if(!cands.length) break;
+      const [r,i,v]=cands[rnd(cands.length)]; givens[r].set(sol[r][i],v);
+    }
+    const extra={none:0,some:Math.ceil(R/2),lots:R}[p.hints]||0;
+    for(let k=0;k<extra;k++){
+      const c=[]; for(let r=0;r<R;r++) for(let w=0;w<3;w++) if(!givens[r].has(sol[r][w])) c.push([r,w]);
+      if(!c.length) break;
+      const min=Math.min(...c.map(([r])=>givens[r].size)); const pick=c.filter(([r])=>givens[r].size===min);
+      const [r,w]=pick[rnd(pick.length)]; givens[r].set(sol[r][w],TV[w]);
+    }
+    const ng=givens.reduce((a,g)=>a+g.size,0);
+    const stats={Unique:res.count===1?'Yes, one answer':'No','Starting animals':`${ng} of ${R*3+B+S}`,'Solver effort':`${res.steps} steps`};
+    if(BOX) stats['Boxy weighs']=`${boxW}`;
+    if(fixedR) stats.Note='Evenly mixed needs 3, 6 or 9 floes, so this rounded down';
+    if(forcedW) stats.Note='Evenly mixed needs floes at least 7 long';
+    const z={trio:TV.slice(),R,W,piv,sol,colSum,givens,fx:fxSolve,boxW,boxRow,boxCol,B,S,PK,PL:PK[0][2],pairName:{twins:'Twins',wham:'WHAM',snoozy:'Snoozy'}[PKEY],twist:tw,rule,stats};
+    this.clear(z);
+    return z;
+  },
+  isBox(z,r,c){ return r===z.boxRow && c===z.boxCol; },
+  /* Is a two-square penguin lying across this square with its head on the square left of it?
+     The generator records a pair by its LEFT column only — slots(r) hands back index 6, where
+     the piece starts — so neither givens nor fx ever mentions the square its other half covers.
+     Every question about that square answered wrong: untinted, unlocked, and tappable — and
+     since tapping any square of a pair removes the whole pair, one tap deleted a penguin the
+     puzzle had given you. The recursion stops after one step: the square to the left holds a
+     PAIR_L code, and the two lists are disjoint, so it can never itself be a tail. */
+  pairTail(z,r,c){ return c>0 && PAIR_R.includes(z.grid[r][c]) && PAIR_L.includes(z.grid[r][c-1]); },
+  locked(z,r,c){ if(this.pairTail(z,r,c)) return this.locked(z,r,c-1);
+    return z.givens[r].has(c)||z.fx[r].has(c)||!!(z.pinned&&z.pinned.has(r+','+c)); },
+  truthAt(z,r,c){ if(this.isBox(z,r,c)) return 20+z.boxW; if(z.fx[r].has(c)) return 10+z.fx[r].get(c); const pl=z.sol[r]; const i=pl.slice(0,4).indexOf(c); if(i>=0) return iv(i); if(pl[6]===c) return pl[9]; if(pl[6]>=0&&pl[6]+1===c) return pl[9]+1; return 0; },
+  pin(z,r,c){ const t=this.truthAt(z,r,c), v=t===0?4:t; z.pinned.set(r+','+c,v); z.grid[r][c]=v;
+    if(PAIR_L.includes(t) && !z.pinned.has(r+','+(c+1))){ z.pinned.set(r+','+(c+1),t+1); z.grid[r][c+1]=t+1; }
+    if(PAIR_R.includes(t) && !z.pinned.has(r+','+(c-1))){ z.pinned.set(r+','+(c-1),t-1); z.grid[r][c-1]=t-1; } },
+  applyPins(z,onlyRow){ if(!z.pinned) return; for(const [k,v] of z.pinned){ const [r,c]=k.split(',').map(Number); if(onlyRow==null||onlyRow===r) z.grid[r][c]=v; } },
+  floatsPlaced(z){ return z.grid.reduce((a,row)=>a+row.filter(v=>v===6).length,0); },
+  snzPlaced(z){ return z.grid.reduce((a,row)=>a+row.filter(v=>PAIR_L.includes(v)).length,0); },
+  hud(z){ const ok=range(z.R).filter(r=>this.rowOk(z,r)).length;
+    return `<span>Balanced <b>${ok}</b> / ${z.R}</span>${z.B?`<span>Floaty <b>${this.floatsPlaced(z)}</b> / ${z.B}</span>`:''}${z.S?`<span>${z.pairName} <b>${this.snzPlaced(z)}</b> / ${z.S}</span>`:''}${z.boxRow>=0?`<span>Boxy <b>${z.grid[z.boxRow][z.boxCol]>20?z.grid[z.boxRow][z.boxCol]-20:'?'}</b></span>`:''}${z.hints?`<span>Hints <b>${z.hints}</b></span>`:''}`; },
+  torque(z,r){ return z.grid[r].reduce((t,v,c)=>t+wt(v)*(c-z.piv[r]),0); },
+  snzOk(g){ for(let c=0;c<g.length;c++){ if(PAIR_L.includes(g[c]) && g[c+1]!==g[c]+1) return false; if(PAIR_R.includes(g[c]) && g[c-1]!==g[c]-1) return false; } return g.filter(x=>PAIR_L.includes(x)).length<=1; },
+  rowOk(z,r){ const g=z.grid[r], pv=g[z.piv[r]];
+    if(r===z.boxRow && z.grid[r][z.boxCol]===20) return false;
+    return trioDone(g) && g.filter(x=>x===6).length<=1 && this.snzOk(g)
+      && !(pv===6||PAIR_ALL.includes(pv)) && this.torque(z,r)===0 && (z.rule==='off' || isAnimal(pv)); },
+  render(z,el){
+    const cell=`min(46px,calc((100vw - 122px)/${z.W} - 3px))`;
+    let h=`<div style="--w:${z.W};--cell:${cell}">`;
+    if(z.rule==='diff'){ const per=z.R/3, cnt=[0,0,0,0];
+      for(let r=0;r<z.R;r++){ const v=z.grid[r][z.piv[r]]; if(isAnimal(v)) cnt[v]++; }
+      h+=`<div class="ptrack" aria-label="Igloo residents"><span class="pl"><i>${IGLOO}</i>Igloos need</span>${[1,2,3].map(w=>`<span class="pc ${cnt[w]===per?'full':cnt[w]>per?'over':''}">${mini(w,26)}<b>${cnt[w]}/${per}</b></span>`).join('')}</div>`; }
+    h+=`<div class="floes">`;
+    const boxOpen = z.reveal || z.won;
+    for(let r=0;r<z.R;r++){
+      const g=z.grid[r], t=this.torque(z,r), cpx=Math.min(46,(Math.min(window.innerWidth||390,560)-122)/z.W-3), arm=(Math.max(z.piv[r],z.W-1-z.piv[r])+.5)*(cpx+3), maxDeg=Math.asin(Math.min(1,18/arm))*180/Math.PI, deg=t===0?0:maxDeg*Math.tanh(t/4);
+      const okRow=this.rowOk(z,r), mood = okRow ? 'happy' : (t!==0 && g.some(x=>wt(x)!==0) ? 'worried' : '');
+      const px=`calc(4px + (${cell} + 3px) * ${z.piv[r]} + ${cell} / 2)`;
+      /* Tutorial only: what each square multiplies a penguin's weight by. The lessons used
+         to assert that "weight farther from the ▲ pushes harder" once and never show it.
+         Above the plank, not inside the squares — a penguin fills its square and Auto ✕
+         stamps over the empty ones. Per floe, because lesson 3's ▲ wanders. */
+      h+=`<div class="floegroup">`;
+      if(MODE.kind==='tut') h+=`<div class="mults" aria-hidden="true">${range(z.W).map(c=>{const d=Math.abs(c-z.piv[r]); return `<span class="${d===0?'piv':''}">×${d}</span>`;}).join('')}</div>`;
+      h+=`<div class="frow ${mood}" data-r="${r}" style="--lean:${(-deg*1.2).toFixed(1)}deg"><div class="water" aria-hidden="true"></div><div class="plank" style="transform-origin:${px} 100%;transform:rotate(${deg}deg)">`;
+      for(let c=0;c<z.W;c++){
+        const v=g[c], lock=this.locked(z,r,c), box=this.isBox(z,r,c);
+        /* Was it here before the player touched anything? Narrower than `lock`, which also
+           counts squares a power-up revealed. */
+        /* A pinned square is deliberately NOT a preset, so the tail follows its head on
+           givens and fx only, not on `lock`. */
+        const pc = this.pairTail(z,r,c) ? c-1 : c;
+        const preset = z.givens[r].has(pc) || z.fx[r].has(pc);
+        let inner='', cls='';
+        if(box) inner=boxyCell(v, boxOpen?z.boxW:0, mood);
+        else if(PAIR_L.includes(v)) inner=pairCell(v,mood);
+        else if(PAIR_R.includes(v)) inner='';
+        else if(wt(v)) inner=animal(v,mood);
+        else if(v===4){ inner='✕'; cls='xmark'; }
+        else if(v===5){ inner='✕'; cls='xmark autox'; }
+        else if(z.reveal){ const pl=z.sol[r], i=pl.slice(0,4).indexOf(c);
+          if(i>=0){ inner=animal(iv(i)); cls='ghost'; } else if(pl[6]===c){ inner=pairCell(pl[9]); cls='ghost'; } }
+        if(PAIR_R.includes(v)) cls+=' snzr';
+        if(z.hintCell && z.hintCell.r===r && z.hintCell.c===c) cls+=' hintcell';
+        if(z.badCells && z.badCells.has(r+','+c)) cls+=' flagbad';
+        if(z.pu && !finished && (z.pu==='peek' ? (c===z.piv[r] && !lock) : z.pu==='floe' ? floeReady(z,r) : z.pu==='col' ? colReady(z,c) : true)) cls+=' pick';
+        const isP=c===z.piv[r];
+        h+=`<button class="slot ${isP?'piv':''} ${isP&&inner&&!cls.includes('xmark')?'has':''} ${lock&&!box?'given':''} ${preset&&!box?'preset':''} ${box?'boxslot':''} ${cls}" data-r="${r}" data-c="${c}" aria-label="Floe ${r+1} ${box?'Boxy, tap to set weight':isP?'igloo':'spot '+(c+1)}">${isP?`<i class="igloo">${IGLOO}</i>`:''}${inner}</button>`;
+      }
+      const level = t===0 && g.some(x=>wt(x)!==0&&x<10), ok=okRow;
+      const side = z.vrows&&z.vrows.has(r) ? '<span class="rowok" aria-label="checked correct">✓</span>' : `<div class="tray" aria-hidden="true">${TV.map((w,i)=>mini(w,22,g.filter(x=>x===w).length>TV.slice(0,i).filter(x=>x===w).length?'used':'')).join('')}</div>`;
+      /* The given-pair tail used to need excluding by hand here; `locked` covers it now. */
+      const userStuff = g.some((v,c)=>!this.locked(z,r,c) && v!==0 && v!==5);
+      const clr = userStuff && !z.reveal ? `<button class="rowclr" data-clr="${r}" aria-label="Clear floe ${r+1}">✕</button>` : '';
+      h+=`</div><div class="fulcrum ${level?'ok':''}" style="left:${px}"></div>${side}${clr}</div></div>`;
+    }
+    h+=`</div><div class="sums">`;
+    /* Lesson 2 is the lesson about column totals, and the running total is behind a toggle
+       the player has not been told about — so the lesson taught people to read a number
+       while hiding the half of it that moves. Forced on for lesson 2 without touching the
+       player's own saved setting. */
+    const showCur=(SHOWCUR||(MODE.kind==='tut'&&MODE.n===2))&&!z.pure;
+    const coachCol = MODE.kind==='tut' ? tutCoach(z,MODE.n).col : null;
+    for(let c=0;c<z.W;c++){ const cur=z.grid.reduce((a,row)=>a+wt(row[c]),0), tgt=z.colSum[c];
+      const any=z.grid.some(row=>wt(row[c])!==0);
+      /* The colour is always on; only the running number is behind the toggle.
+         Every floe can sit level with its ▲ green while three columns are wrong, which made
+         a half-finished board look finished. Green and red are arithmetic the player could
+         do from the pieces on screen — the number just saves them doing it. Still no "over"
+         while a Floaty is *still out*, since a -1 can bring an over-weight column back down;
+         once they are all placed it cannot, so having had one is no reason to stay quiet. */
+      const floatiesOut = z.B && this.floatsPlaced(z) < z.B;
+      const state = cur>tgt&&!floatiesOut ? 'over' : cur===tgt&&any ? 'hit' : '';
+      /* Lesson 2 names one column at a time. Without this the words name a number the
+         player then has to find by counting along a row of five, which is where the point
+         gets lost. */
+      const focus = MODE.kind==='tut' && coachCol===c ? 'focus' : '';
+      h+=`<span class="${state} ${focus} ${z.vcols&&z.vcols.has(c)?'vcol':''}">${tgt}${showCur?`<small>${cur}</small>`:''}</span>`; }
+    h+=`</div><div class="sumlabel">${showCur?'Column totals: target on top, what’s there now below':'Total weight needed in each column'}</div>`;
+    if(MODE.kind==='tut') h+=this.lessonCard(z,MODE.n);
+    h+=`</div>`;
+    el.innerHTML=h;
+  },
+  /* Lesson 1's balance, worked out live and term by term.
+     The ×N above the squares names the multiplier; this does the arithmetic with it on the
+     player's own board, so "1 × 2 = 2, the same as 2 × 1" is something they watch happen
+     rather than something they were told. Lesson 1 only: it is the single-floe balance
+     lesson, so there is exactly one sum to show.
+     Built square by square rather than piece by piece, mirroring torque(), which is what
+     keeps it right for a two-square penguin whose halves sit at different distances. */
+  /* What this lesson is teaching, measured against the board in front of the player.
+     Each lesson owns one of the three deductions the game is made of — the same three the
+     hint engine knows: balance, column totals, igloo quotas. tutCoach picks the sentence;
+     this draws it with whatever working the lesson needs above it. Lesson 3 gets no working
+     because the igloo tracker already sits above the floes doing exactly that job. */
+  lessonCard(z, lesson){
+    const c = tutCoach(z, lesson);
+    let head = '';
+    if(lesson===1) head = this.pushSums(z);
+    else if(lesson===2 && c.col!==null){
+      const now = z.grid.reduce((a,row)=>a+wt(row[c.col]),0);
+      head = `<div class="bcol"><small>Column ${c.col+1}</small><b>needs ${z.colSum[c.col]}</b>`
+           + `<b class="${now===z.colSum[c.col]?'ok':'part'}">has ${now}</b></div>`;
+    }
+    return `<div class="balcard">${head}<p class="bstep ${c.landed?'ok':''}">${c.text}</p></div>`;
+  },
+  /* Lesson 1's balance, term by term, as the player places.
+     Built square by square rather than piece by piece, mirroring torque(), which is what
+     keeps it right for a two-square penguin whose halves sit at different distances. */
+  pushSums(z){
+    const r=0, piv=z.piv[r];
+    let left=[], right=[], rock=[], lp=0, rp=0;
+    for(let c=0;c<z.W;c++){
+      const w=wt(z.grid[r][c]); if(!w) continue;
+      const d=c-piv, term=`${w}×${Math.abs(d)}`;
+      if(d<0){ left.push(term); lp+=w*-d; }
+      else if(d>0){ right.push(term); rp+=w*d; }
+      else rock.push(`${w}×0`);
+    }
+    const placed=!!(left.length||right.length||rock.length), level=lp===rp;
+    /* Amber, not red, on the heavier side: this card explains, and red reads as "wrong"
+       when the side pushing harder is simply the side pushing harder. */
+    const side=(t,terms,tot,win)=>`<div class="bside"><small>${t}</small><em>${terms.length?terms.join(' + '):'—'}</em><b class="${win?'win':''}">= ${tot}</b></div>`;
+    const op = !placed ? '⚖️' : level ? '=' : lp>rp ? '&gt;' : '&lt;';
+    return `<div class="brow">${side('← Pushing left',left,lp,!level&&lp>rp)}`
+      + `<span class="bop ${level&&placed?'ok':''}">${op}</span>`
+      + `${side('Pushing right →',right,rp,!level&&rp>lp)}</div>`
+      /* States the sum and names nobody: it used to say "even an emperor pushes nothing",
+         which read as a lie the moment a player tried the chick there instead. */
+      + (rock.length?`<p class="brock">Over the ▲: ${rock.join(' + ')} = 0</p>`:'');
+  },
+  clearSnz(z,r,c){ const g=z.grid[r]; if(PAIR_L.includes(g[c])){ const v=g[c]; g[c]=0; if(g[c+1]===v+1) g[c+1]=0; } else if(PAIR_R.includes(g[c])){ const v=g[c]; g[c]=0; if(g[c-1]===v-1) g[c-1]=0; } },
+  freeCell(z,r,c){ return c>=0 && c<z.W && c!==z.piv[r] && !this.locked(z,r,c) && [0,4,5].includes(z.grid[r][c]); },
+  putSnz(z,r,c){ if(c===z.piv[r]) return false; const g=z.grid[r];
+    if(this.freeCell(z,r,c+1)){ g[c]=z.PL; g[c+1]=z.PL+1; return true; }
+    if(this.freeCell(z,r,c-1)){ g[c-1]=z.PL; g[c]=z.PL+1; return true; }
+    return false; },
+  place(z,r,c,v){ if(PAIR_L.includes(v)){ this.clearSnz(z,r,c); if(PAIR_ALL.includes(z.grid[r][c+1])) this.clearSnz(z,r,c+1); z.grid[r][c]=v; z.grid[r][c+1]=v+1; } else z.grid[r][c]=v; },
+  tapRC(z,r,c){
+    if(this.isBox(z,r,c)){ if(z.pinned&&z.pinned.has(r+','+c)) return; const v=z.grid[r][c]; z.grid[r][c]= v>=25 ? 20 : v<21 ? 21 : v+1; return; }
+    if(this.locked(z,r,c)) return; const v=z.grid[r][c];
+    if(v===16||v===17){ const L=v===16?c:c-1; z.grid[r][L]=18; z.grid[r][L+1]=19; return; }
+    if(PAIR_ALL.includes(v)){ this.clearSnz(z,r,c); return; }
+    if(v===4){ z.grid[r][c]=0; return; } if(v===5){ z.grid[r][c]=TV[0]; return; }
+    /* The igloo takes base penguins only -- rowOk rejects a Floaty or a pair there, so
+       offering them was offering a move no solution could contain. putSnz/freeCell
+       already kept pairs out; Floaty had nothing stopping it. */
+    const atPiv=c===z.piv[r];
+    const seq=[0,...new Set(TV)].concat(z.B&&!atPiv?[6]:[]).concat(z.S&&!atPiv?[z.PL]:[]);
+    let nv=seq[(seq.indexOf(v)+1)%seq.length];
+    if(nv===z.PL){ z.grid[r][c]=0; if(this.putSnz(z,r,c)) return; nv=0; }
+    z.grid[r][c]=nv; },
+  markX(z,r,c){ if(this.locked(z,r,c)) return; const v=z.grid[r][c]; if(PAIR_ALL.includes(v)) this.clearSnz(z,r,c); z.grid[r][c]= v===4 ? 0 : 4; },
+  applyAuto(z){
+    for(let r=0;r<z.R;r++) for(let c=0;c<z.W;c++) if(z.grid[r][c]===5) z.grid[r][c]=0;
+    if(!AUTOX) return;
+    const specials=(z.B?1:0)+(z.S?1:0);
+    for(let r=0;r<z.R;r++){ const g=z.grid[r];
+      if(r===z.boxRow && g[z.boxCol]===20) continue;
+      const three=trioDone(g), has=(g.includes(6)?1:0)+(g.some(x=>PAIR_L.includes(x))?1:0), tq=this.torque(z,r);
+      if(three && (specials===0 || has===specials || (tq===0 && (specials===1 || has===1)))) for(let c=0;c<z.W;c++) if(g[c]===0) g[c]=5; }
+    if(z.pure) return;
+    const allPlaced=(!z.B || this.floatsPlaced(z)===z.B) && (!z.S || this.snzPlaced(z)===z.S);
+    for(let c=0;c<z.W;c++){
+      if(c===z.boxCol && z.grid[z.boxRow][c]===20) continue;
+      const cur=z.grid.reduce((a,row)=>a+wt(row[c]),0);
+      if(cur!==z.colSum[c]) continue;
+      /* A column that already adds up gets crossed off — but not while a Floaty is still
+         out, because a Floaty is -1 and the column could take one *and* a chick and still
+         land on its total. That compensation needs two free squares though; with one left
+         there is nothing to pair it with, and every piece weighs something, so it must be
+         empty. The old rule checked allPlaced alone and refused to cross off any column
+         anywhere until the last Floaty was down. */
+      const free=[]; for(let r=0;r<z.R;r++) if(z.grid[r][c]===0) free.push(r);
+      if(allPlaced || free.length<=1) for(const r of free) z.grid[r][c]=5; }
+  },
+  hint(z){
+    const R=z.R, W=z.W, per=R/3, B=z.B, S=z.S;
+    const truth=(r,c)=>{ const pl=z.sol[r]; const i=pl.slice(0,4).indexOf(c); if(i>=0) return iv(i); if(pl[6]===c) return pl[9]; if(pl[6]>=0&&pl[6]+1===c) return pl[9]+1; return 0; };
+    if(z.boxRow>=0){ const v=z.grid[z.boxRow][z.boxCol]; if(v>20 && v-20!==z.boxW) return {r:z.boxRow,c:z.boxCol,msg:`Boxy doesn’t weigh ${v-20}. Tap the box to change it.`}; }
+    for(let r=0;r<R;r++) for(let c=0;c<W;c++){ if(this.locked(z,r,c)) continue; const v=z.grid[r][c];
+      if((isAnimal(v)||v===6||PAIR_ALL.includes(v)) && truth(r,c)!==v){ const nm=PAIR_ALL.includes(v)?pairName(v):NAME[v]; return {r,c,msg:`${v===7||v===8?'These Twins':'This '+nm} can’t stay here. Take ${v===7||v===8?'them':'it'} off and look again.`}; }
+      if(v===4 && truth(r,c)) return {r,c,msg:'Something does belong in this spot, so this ✕ needs to go.'}; }
+    const fxr=z.fx.map((m,r)=>{ const n=new Map(m); if(r===z.boxRow && z.grid[r][z.boxCol]>20) n.set(z.boxCol,z.grid[r][z.boxCol]-20); return n; });
+    const isX=(r,c)=>c>=0&&(z.grid[r][c]===4||z.grid[r][c]===5);
+    let opts=range(R).map(r=>{ const known=new Map(); for(let c=0;c<W;c++){ const v=z.grid[r][c]; if(isAnimal(v)||v===6||PAIR_L.includes(v)) known.set(c,v); }
+      return rowPlacements(W,z.piv[r],known,z.rule,0,fxr[r],B?1:0,S?1:0,z.PK).filter(pl=>![0,1,2,3].some(i=>isX(r,pl[i])) && !(pl[6]>=0&&(isX(r,pl[6])||isX(r,pl[6]+1)))); });
+    const forced=()=>{ for(let r=0;r<R;r++){ if(!opts[r].length) continue;
+      for(let w=0;w<4;w++){ const cs=new Set(opts[r].map(pl=>pl[w])); if(cs.size===1){ const c=[...cs][0]; if(c>=0 && z.grid[r][c]!==iv(w)) return {r,c,w:iv(w)}; } }
+      const ss=new Set(opts[r].map(pl=>pl[6]+':'+pl[9])); if(ss.size===1){ const pl=opts[r][0], c=pl[6]; if(c>=0 && z.grid[r][c]!==pl[9]) return {r,c,w:pl[9]}; }
+      if(r===z.boxRow && z.grid[r][z.boxCol]===20){ const ks=new Set(opts[r].map(pl=>pl[4])); if(ks.size===1){ const k=[...ks][0]; return {r,c:z.boxCol,w:20+k,box:k}; } } }
+      return null; };
+    const countPass=(idx,T)=>{ let any=false; if(!T) return false; const yes=[], maybe=[];
+      for(let r=0;r<R;r++){ const h=opts[r].map(pl=>pl[idx]>=0); if(h.every(x=>x)) yes.push(r); else if(h.some(x=>x)) maybe.push(r); }
+      if(yes.length===T) maybe.forEach(r=>{ const n=opts[r].length; opts[r]=opts[r].filter(pl=>pl[idx]<0); if(opts[r].length<n) any=true; });
+      else if(yes.length+maybe.length===T) maybe.forEach(r=>{ const n=opts[r].length; opts[r]=opts[r].filter(pl=>pl[idx]>=0); if(opts[r].length<n) any=true; });
+      return any; };
+    const pivotPass=()=>{ let any=false;
+      if(z.rule==='diff'){ let changed=true;
+        while(changed){ changed=false; const cnt=[0,0,0], fixed=new Set();
+          for(let r=0;r<R;r++){ const s=new Set(opts[r].map(pl=>pl.slice(0,3).indexOf(z.piv[r]))); if(s.size===1){ fixed.add(r); cnt[[...s][0]]++; } }
+          for(let w=0;w<3;w++) if(cnt[w]>=per) for(let r=0;r<R;r++){ if(fixed.has(r)) continue; const n=opts[r].length;
+            opts[r]=opts[r].filter(pl=>pl.slice(0,3).indexOf(z.piv[r])!==w); if(opts[r].length<n){ changed=true; any=true; } } } }
+      if(countPass(3,B)) any=true; if(countPass(6,S)) any=true;
+      return any; };
+    const say=(f,why)=> f.box ? {...f,msg:`${why} Boxy must weigh ${f.box}. Tap the box to set it.`} : {...f,msg:`${why} ${f.w===16?'Snoozy goes here, head on the left':f.w===18?'Snoozy goes here, head on the right':`${theNAME(f.w)} ${f.w===7?'go':'goes'} here`}.`};
+    let f=forced();
+    if(f) return say(f,`Floe ${f.r+1} can only balance one way with what’s on it, so`);
+    pivotPass(); f=forced();
+    if(f) return say(f,`Counting the igloo residents${B||S?' and special penguins':''} narrows floe ${f.r+1} down, so`);
+    const blame=new Array(R).fill(-1);
+    const base=new Array(W).fill(0); fxr.forEach(m=>m.forEach((w,c)=>base[c]+=w));
+    const contrib=pl=>{ const a=new Array(W).fill(0); addPl(a,pl,1); return a; };
+    for(let guard=0;guard<60;guard++){
+      let changed=false;
+      const mn=opts.map(o=>{ const a=new Array(W).fill(Infinity); o.forEach(pl=>{ const k=contrib(pl); for(let c=0;c<W;c++) a[c]=Math.min(a[c],k[c]); }); return a; });
+      const mx=opts.map(o=>{ const a=new Array(W).fill(-Infinity); o.forEach(pl=>{ const k=contrib(pl); for(let c=0;c<W;c++) a[c]=Math.max(a[c],k[c]); }); return a; });
+      for(let r=0;r<R;r++){
+        const omin=range(W).map(c=>range(R).reduce((s,q)=>q===r?s:s+mn[q][c],0));
+        const omax=range(W).map(c=>range(R).reduce((s,q)=>q===r?s:s+mx[q][c],0));
+        const n=opts[r].length;
+        opts[r]=opts[r].filter(pl=>{ const k=contrib(pl); for(let c=0;c<W;c++){ const need=z.colSum[c]-base[c]-k[c]; if(need<omin[c]||need>omax[c]){ blame[r]=c; return false; } } return true; });
+        if(opts[r].length<n) changed=true;
+      }
+      if(pivotPass()) changed=true;
+      f=forced(); if(f||!changed) break;
+    }
+    if(f){ const bc=blame[f.r];
+      return say(f, bc>=0 ? `Column ${bc+1} has to add up to ${z.colSum[bc]}. That rules out every other way to balance floe ${f.r+1}, so` : `Put the floes and the column totals together:`); }
+    const cands=[];
+    if(z.boxRow>=0 && z.grid[z.boxRow][z.boxCol]===20) cands.push({r:z.boxRow,c:z.boxCol,w:20+z.boxW,box:z.boxW});
+    for(let r=0;r<R;r++){ const pl=z.sol[r];
+      for(let w=0;w<4;w++){ const c=pl[w]; if(c>=0 && z.grid[r][c]!==iv(w)) cands.push({r,c,w:iv(w)}); }
+      if(pl[6]>=0 && z.grid[r][pl[6]]!==pl[9]) cands.push({r,c:pl[6],w:pl[9]}); }
+    if(!cands.length) return null;
+    const pick=cands[Math.floor(Math.random()*cands.length)];
+    return {...pick,place:true,msg: pick.box ? `This one takes a longer chain of logic, so here’s a freebie: Boxy weighs ${pick.box}.` : `This spot takes a longer chain of logic, so here’s a free ${pick.w===7?'pair of Twins':NAME[pick.w]}.`};
+  },
+  problems(z){ const out=[];
+    if(z.boxRow>=0 && z.grid[z.boxRow][z.boxCol]===20) out.push('Work out Boxy’s weight, then tap the box to set it.');
+    const bad=range(z.R).filter(r=>!this.rowOk(z,r)); if(bad.length) out.push(`Floe ${bad.map(r=>r+1).join(', ')} ${bad.length>1?'aren’t':'isn’t'} done yet.`);
+    const bc=range(z.W).filter(c=>z.grid.reduce((a,row)=>a+wt(row[c]),0)!==z.colSum[c]); if(bc.length) out.push(`${bc.length} column total${bc.length>1?'s are':' is'} off.`);
+    if(z.B && this.floatsPlaced(z)!==z.B) out.push(`Place exactly ${z.B} Floaty penguin${z.B>1?'s':''}.`);
+    if(z.S && this.snzPlaced(z)!==z.S) out.push(z.pairName==='Twins'?'Place the Twins.':`Place ${z.pairName}.`);
+    if(z.rule==='diff'){ const per=z.R/3, cnt=[0,0,0,0]; range(z.R).forEach(r=>{ const v=z.grid[r][z.piv[r]]; cnt[isAnimal(v)?v:0]++; });
+      if([1,2,3].some(w=>cnt[w]!==per)) out.push(`Each kind of animal needs to live in exactly ${per===1?'one igloo':per+' igloos'}.`); }
+    return {out,bad:new Set()}; },
+  solved(z){ return this.problems(z).out.length===0; },
+  clearRow(z,r){ const keep = r===z.boxRow ? z.grid[r][z.boxCol] : null; const row=new Array(z.W).fill(0);
+    for(const [c,v] of z.givens[r]){ row[c]=v; if(PAIR_L.includes(v)) row[c+1]=v+1; }
+    for(const [c,w] of z.fx[r]) row[c]= w===0 ? 20 : 10+w;
+    if(keep!=null) row[z.boxCol]=keep; z.grid[r]=row; this.applyPins(z,r); },
+  clear(z){ z.grid=z.piv.map((_,r)=>{ const row=new Array(z.W).fill(0);
+    for(const [c,v] of z.givens[r]){ row[c]=v; if(PAIR_L.includes(v)) row[c+1]=v+1; }
+    for(const [c,w] of z.fx[r]) row[c]= w===0 ? 20 : 10+w; return row; }); this.applyPins(z); }
+};
+
+/* =========================================================
+   SHELL
+   ========================================================= */
+const GAMES=[TippyFloe];
+const P={}; GAMES.forEach(g=>P[g.id]={...g.defaults});
+let G=null, Z=null, MODE={kind:'sandbox'}, t0=0, tick=null, finished=false, genMs=0;
+let soundOn=load('pz-sound',true), AC=null;
+
+/* sound */
+function tone(freqs,dur=.12,gap=.09){
+  if(!soundOn) return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const emit = () => {
+      const t=AC.currentTime;
+      freqs.forEach((f,i)=>{ const o=AC.createOscillator(), g=AC.createGain(); o.type='triangle'; o.frequency.value=f;
+        const s=t+i*gap; g.gain.setValueAtTime(0,s); g.gain.linearRampToValueAtTime(.16,s+.012); g.gain.exponentialRampToValueAtTime(.001,s+dur+.18);
+        o.connect(g).connect(AC.destination); o.start(s); o.stop(s+dur+.25); });
+    };
+    /* Browsers suspend the context while the tab is hidden and leave it suspended on the
+       way back, which is why the game came back silent. `resume` is asynchronous, and a
+       suspended context's clock is frozen — so scheduling before it resolves puts every
+       note at a timestamp that never arrives. Wait for it. */
+    if(AC.state!=='running') AC.resume().then(emit).catch(()=>{});
+    else emit();
+  }catch(e){}
+}
+function syncSnd(){ $('#snd').textContent=soundOn?'🔊':'🔈'; $('#snd').setAttribute('aria-label',soundOn?'Sound on':'Sound off'); }
+
+/* levels + daily */
+const LEVELS=30;
+const dayBefore=k=>{ const d=new Date(k+'T12:00:00'); d.setDate(d.getDate()-1); return d.toLocaleDateString('en-CA'); };
+const dow=k=>new Date(k+'T12:00:00').getDay();
+// Saturday and Sunday share one Mega Weekend puzzle, keyed by Saturday's date
+const puzzleKeyOf=k=>dow(k)===0?dayBefore(k):k;
+const todayKey=()=>puzzleKeyOf(new Date().toLocaleDateString('en-CA'));
+const prevKey=k=>puzzleKeyOf(dayBefore(k));
+const isWeekend=k=>dow(k)===6;
+const prettyDay=k=>new Date(k+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
+function dailyState(){ const d=load('pz-daily',{last:null,streak:0,solved:{}}); const t=todayKey();
+  if(d.last!==t && d.last!==prevKey(t)) d.streak=0; return d; }
+/* A sawtooth, not a climb. The old rule went 3 floes to level 8 then 6 forever, so every
+   level past 8 was a 90-150 second sit that never came back down. Research on casual puzzle
+   pacing wants a long onboarding of near-guaranteed wins, a climb to a clearly *labelled*
+   peak where failing is expected, and a relief level straight after each peak. The ⚡ spike
+   every 6th already carries the label and the double fish, so it becomes the peak — and what
+   makes it a peak is the special penguin it always gets, not a bigger board. The level after
+   it is always a 3-floe breather. Nine floes never appear here: that board is a 2.5-4 minute
+   sit, the wrong shape for a mode people dip into, and it belongs in the Challenges section
+   that advertises it. */
+const levelR = n => n<=4 ? 3
+  : n%6===0 ? 6
+  : n%6===1 ? 3
+  : n%3===0 ? 6
+  : 3;
+const isSpikeLevel = n => n%6===0;
+const TH = n => { const R=levelR(n); return R===3?[40,55,70]:R===6?[90,120,150]:[150,195,240]; };
+function levelSeed(n){ const m=load('pz-seeds',{}); if(!m[n]){ m[n]=1+Math.floor(Math.random()*1e9); save('pz-seeds',m); } return m[n]; }
+const starsFor = (s,n) => { const t=TH(n); return s<t[0]?3:s<t[1]?2:s<t[2]?1:0; };
+const recOf = v => v==null?null: typeof v==='number'?{t:v,ct:v}:v;
+const bestOf = (v,n) => { const r=recOf(v); if(!r) return null; const a=starsFor(r.t,n), b=r.ct!=null?starsFor(r.ct,n):-1;
+  return b>=a?{stars:b,clean:true,time:r.ct}:{stars:a,clean:false,time:r.t}; };
+const starHTML = (n,clean) => [0,1,2].map(i=>`<span class="${i<n?(clean?'dia':'gold'):'off'}">★</span>`).join('');
+const levelsDone=()=>load('pz-levels',{});
+const maxLevel=()=>Math.max(0,...Object.keys(levelsDone()).map(Number));
+
+/* screens */
+function show(which,title){
+  if(which==='game' && title) title=title.replace(/ (\S+)$/,'\u00A0$1');
+  document.body.classList.toggle('ingame', which==='game'); { const lng = which==='game' && (title||'').length>22; const h=$('#title'); h.style.fontSize = lng ? '19px' : ''; h.style.whiteSpace = lng ? 'normal' : ''; h.style.lineHeight = lng ? '1.05' : ''; } document.querySelector('.tt').hidden = !title && which!=='game';
+  ['home','levels','game'].forEach(id=>$('#'+id).hidden=id!==which);
+  $('#back').hidden=which==='home'; $('#title').textContent=title;
+  if(which!=='game'){ clearInterval(tick); $('#timer').textContent=''; }
+  window.scrollTo(0,0);
+}
+function dailyIcon(tw){ return tw.box?boxySVG(false):tw.wham?whamSVG():tw.snoozy?snoozySVG():tw.twins?twinsSVG():tw.balloons?floaty():chonk((tw.fixed||[4])[0]); }
+
+/* ---------- Pokeable home mascot ---------- */
+const vib=p=>{ try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} };
+let POKE;
+/* ---------- daily gift ---------- */
+/* The three rewards are rolled from the date, so the day's offer is the same for everyone and
+   quitting mid-animation can't reshuffle them into something better. The claim is written the
+   instant a chest is picked, before anything is revealed. Always one power-up and two
+   different-sized piles of fish: no chest is ever a dud. */
+const GIFT_SEED = day => (+day.replace(/-/g,'')) + 7700000;
+function giftRewards(day){
+  return withSeed(GIFT_SEED(day), () => {
+    const modest = {fish: 30 + rnd(4)*10};
+    const generous = {fish: 90 + rnd(4)*20};
+    const id = GIFT_POOL[rnd(GIFT_POOL.length)];
+    return shuffle([modest, generous, {pu:id, n: rnd(5)===0 ? 2 : 1}]);
+  });
+}
+const giftClaim = () => load('pz-gift', null);
+const giftOpen = () => { const c = giftClaim(); return !c || c.day !== todayKey(); };
+function openGift(){
+  const day = todayKey(), rewards = giftRewards(day), claim = giftClaim();
+  const taken = (claim && claim.day === day) ? claim.chest : null;
+  const label = r => r.fish ? `${r.fish} fish` : (r.n > 1 ? `${r.n} × ` : '') + PUS.find(p=>p.id===r.pu).name;
+  const chest = (i, open) => `<button class="chest ${open?'open':'shut'}" data-chest="${i}" aria-label="Chest ${i+1}">
+      <span class="lid"></span><span class="box"></span>
+      ${open?`<span class="prize">${rewards[i].fish?'🐟':''}<br>+${rewards[i].fish||rewards[i].n} </span>`:''}
+    </button>`;
+  const body = taken == null
+    ? `<p>Pick a chest. One of the three is holding a power-up.</p>
+       <div class="chestrow">${[0,1,2].map(i=>chest(i,false)).join('')}</div>`
+    : `<p>You opened chest ${taken+1}.</p>
+       <div class="chestrow">${chest(taken,true)}</div>
+       <h2>${label(rewards[taken])}</h2>
+       <p>The others held ${[0,1,2].filter(i=>i!==taken).map(i=>label(rewards[i])).join(' and ')}.</p>
+       <p class="purenote">Another one tomorrow.</p>`;
+  $('#giftBody').innerHTML = body;
+  $('#gift').hidden = false;
+}
+function takeChest(i){
+  if(!giftOpen()) return;
+  const day = todayKey(), r = giftRewards(day)[i];
+  save('pz-gift', {day, chest:i});          /* written before anything is revealed */
+  if(r.fish) addFish(r.fish); else { INV[r.pu] = (INV[r.pu]||0) + r.n; saveInv(); }
+  tone(r.pu ? [784,1047,1319,1568] : [659,880], .09, .07); vib(20);
+  openGift(); renderHome();
+}
+
+/* ---------- the fishing hole ---------- */
+/* Flat cooldown, not a random window. The hole only exists on the home screen, which anyone
+   sees for a few seconds between puzzles, so a random upper bound means most visits find
+   nothing — and a thing you come back to and don't find teaches you to stop looking. */
+const HOLE_COOLDOWN = 15 * 60 * 1000;
+function holeDue(){
+  let t = load('pz-hole-next', 0);
+  /* A clock that jumped forward would otherwise park the next hole weeks out and quietly
+     kill the feature for that player. */
+  if(t - Date.now() > HOLE_COOLDOWN){ t = Date.now() + HOLE_COOLDOWN; save('pz-hole-next', t); }
+  return t;
+}
+const holeOpen = () => Date.now() >= holeDue();
+let CASTING = false;
+function castLine(){
+  if(CASTING || !holeOpen()) return;
+  CASTING = true;
+  const got = 1 + Math.floor(Math.random()*4);
+  /* Booked before the animation, so backgrounding part-way can't fish the same hole twice. */
+  save('pz-hole-next', Date.now() + HOLE_COOLDOWN);
+  const m = $('#mascot'), hole = $('#hole');
+  if(m) m.innerHTML = mascotArt('fishing');
+  tone([523,392],.09,.06); vib(8);
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const land = () => {
+    addFish(got); tone([784,1047,1319],.08,.06); vib([10,40,10]);
+    if(hole) hole.insertAdjacentHTML('beforeend', `<span class="catch">+${got} 🐟</span>`);
+    setTimeout(()=>{ CASTING = false; renderHome(); }, 1500);
+  };
+  if(reduce) return land();
+  setTimeout(land, 1900);
+}
+
+function resetPoke(){ POKE={n:0, limit:15+Math.floor(Math.random()*6), mad:false, t:null}; }
+resetPoke();
+const mascotArt=(mood='happy',blush)=>peng('#3D7DD8',{mood,blush});
+function pokeMascot(){
+  const m=$('#mascot'); if(!m||POKE.mad) return;
+  POKE.n++; clearTimeout(POKE.t);
+  if(POKE.n>=POKE.limit){
+    POKE.mad=true; m.innerHTML=mascotArt('grumpy',0.15);
+    m.classList.remove('wig','gig'); void m.offsetWidth; m.classList.add('huff');
+    const p=$('#puff'); p.hidden=false; p.classList.remove('show'); void p.offsetWidth; p.classList.add('show');
+    tone([330,262],.12,.1); vib(30); return;
+  }
+  const giggle=POKE.n%3===0;
+  m.innerHTML=mascotArt('happy', giggle?1:0.75);
+  m.classList.remove('wig','gig'); void m.offsetWidth; m.classList.add(giggle?'gig':'wig');
+  if(giggle) tone([988,1175,1397],.09,.07);
+  vib(giggle?[10,40,10]:8);
+  POKE.t=setTimeout(()=>{ if(!POKE.mad && $('#mascot')) $('#mascot').innerHTML=mascotArt('happy'); },1400);
+}
+/* ---------- Splash ---------- */
+function runSplash(){
+  const s=$('#splash'); if(!s) return;
+  s.querySelector('.sp-art').innerHTML=peng('#3D7DD8',{mood:'happy'});
+  const hide=()=>{ if(s.classList.contains('out')) return; s.classList.add('out'); setTimeout(()=>s.remove(),450); };
+  s.addEventListener('click',hide); setTimeout(hide,1400);
+}
+
+function bubble(go,icon,label,alert=false,cls=''){ return `<button class="bub ${cls}" data-go="${go}" aria-label="${label}"><span class="bic">${icon}</span>${alert?'<i class="alert" aria-hidden="true">!</i>':''}<b class="blab">${label}</b></button>`; }
+function renderHome(){
+  const d=dailyState(), t=todayKey(), tw=twistFor(t), m=maxLevel(), done=levelsDone(), N=m+1;
+  const stars=Object.entries(done).reduce((a,[n,v])=>a+bestOf(v,+n).stars,0);
+  const solved=d.solved[t], gave=d.gaveUp&&d.gaveUp[t], wk=isWeekend(t);
+  let barLabel, pct;
+  { const nxt=Math.ceil(N/6)*6, left=nxt-N; barLabel= left===0 ? '⚡ Spike level up next!' : `⚡ Spike level in ${left}`; pct=(6-left)/6*100; }
+  const spike=isSpikeLevel(N);
+  $('#home').innerHTML=`<div class="scene">
+    <div class="brand">Penguzzle</div>
+    ${d.streak?`<div class="streakline">🔥 ${d.streak} day${d.streak>1?'s':''} in a row</div>`:''}
+    <button class="hbar" data-go="levels" aria-label="${barLabel}. Open the level list"><div class="hbar-fill" style="width:${pct}%"></div><span>${barLabel} ›</span></button>
+    <div class="side sl">
+      ${bubble('daily', dailyIcon(tw), solved?'Done ✓':wk?'Weekend':'Daily', !solved&&!gave, solved?'done':'')}
+      ${bubble('shop', '<span class="bfish">🐟</span>', 'Shop')}
+      ${bubble('archive', `<span class="calic"><b>${new Date().toLocaleDateString(undefined,{month:'short'})}</b><i>${new Date().getDate()}</i></span>`, 'Archive')}
+    </div>
+    <div class="stage" aria-hidden="true">
+      <div class="mascotwrap"><button class="bigpeng" id="mascot" aria-label="Pip">${CASTING?mascotArt('fishing'):POKE.mad?mascotArt('grumpy',0.15):mascotArt('happy')}</button><span class="puff" id="puff" aria-hidden="true">hmph!</span>${CASTING?'<span class="rod"></span>':''}${(holeOpen()||CASTING)?`<button class="hole" id="hole" aria-label="A fishing hole has opened. Tap to cast."><i></i><b></b><b></b></button>`:''}</div>
+      <div class="stagefloe"></div><div class="stagewater"></div>
+    </div>
+    <div class="side sr">
+      ${bubble('chal', '<span class="bstar">🏆</span>', 'Challenges', picksAvail()>0)}
+      ${bubble('gift', '<span class="bfish">🎁</span>', giftOpen()?'Free gift':'Opened', giftOpen())}
+    </div>
+    ${tutDone()<TUT_STEPS ? `<button class="bigplay" data-go="tut"><span>${tutDone()?'Keep learning':'Start here'}</span><small>Learn to play: lesson ${tutDone()+1} of ${TUT_STEPS}</small></button><button class="skiptut" id="skipTut">I already know how to play</button>`
+      : `<button class="bigplay ${spike?'spike':''}" data-go="play"><span>Level ${N}</span>${spike?'<small>⚡ Spike level: double fish</small>':N===1?'<small>Tap to start</small>':'<small>Tap to play</small>'}</button>`}
+  </div>`;
+}
+function renderLevels(){
+  const done=levelsDone(), m=maxLevel(), last=Math.max(30, Math.ceil((m+1)/10)*10);
+  const total=Object.entries(done).reduce((a,[n,v])=>a+bestOf(v,+n).stars,0);
+  let h=`<p class="startotal"><span class="gold">★</span> ${total} stars so far. Faster solves earn more stars. Solve with no hints, no power-ups and Current weight off and they turn into <span class="dia">★</span> diamond stars.</p>`;
+  for(let s=1;s<=last;s+=10){
+    // group the block into runs of the same floe count, straight from levelR(n), so the text always matches the boards
+    const runs=[]; for(let n=s;n<s+10;n++){ const R=levelR(n), lr=runs[runs.length-1]; if(lr&&lr.R===R&&lr.b===n-1) lr.b=n; else runs.push({R,a:n,b:n}); }
+    const sizes=[...new Set(runs.map(x=>x.R))];
+    const where=R=>runs.filter(x=>x.R===R).map(x=>x.a===x.b?`${x.a}`:`${x.a}–${x.b}`).join(', ');
+    const blurb=sizes.map(R=>{ const t=THR(R); return `${sizes.length>1?`Level${where(R).match(/[–,]/)?'s':''} ${where(R)}: `:''}${R} floes, 3★ under ${fmt(t[0])}, 2★ under ${fmt(t[1])}, 1★ under ${fmt(t[2])}.`; }).join(' ');
+    const extra = s>=11 ? ' Special penguins show up, and every 6th level is a ⚡ spike worth double fish.' : ' Every 6th level is a ⚡ spike worth double fish.';
+    h+=`<h3 class="tier">Levels ${s}–${s+9}</h3><p class="tierp">${blurb}${extra}</p><div class="lvgrid">`;
+    for(let n=s;n<s+10;n++){ const ok=done[n]!=null, open=n<=m+1;
+      const b=ok?bestOf(done[n],n):null;
+      h+=`<button class="lv ${ok?'done':''} ${n===m+1?'next':''}" data-lv="${n}" ${open?'':'disabled'} aria-label="Level ${n}${ok?`, best time ${fmt(b.time)}`:''}"><span class="ln">${n}${isSpikeLevel(n)?'⚡':''}</span>${ok?`<span class="tm">${fmt(b.time)}</span>`:''}</button>`; }
+    h+='</div>';
+  }
+  $('#levels').innerHTML=h;
+}
+function playNextLevel(){ open('tippyfloe',{kind:'level',n:maxLevel()+1}); }
+function goHome(){ G=null; resetPoke(); renderHome(); show('home',''); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
+function _unused(){}
+
+/* ---------- Challenge mode ---------- */
+const SECTIONS=[
+  {group:'Base', name:'3 Floes', r:3, desc:'Chick, Pip and emperor on 3 floes.', icon:()=>chick()},
+  {group:'Base', name:'6 Floes', r:6, desc:'The same three penguins on 6 floes.', icon:()=>peng('#3D7DD8')},
+  {group:'Base', name:'9 Floes', r:9, desc:'The same three penguins on 9 floes.', icon:()=>emperor()},
+  {group:'New Penguins', name:'Chonk', twist:'chonk', desc:'Every puzzle has a Chonk (weighs 4).', icon:()=>chonk(4)},
+  {group:'New Penguins', name:'Mega Chonk', twist:'mega', desc:'Every puzzle has a Mega Chonk (weighs 5).', icon:()=>chonk(5)},
+  {group:'New Penguins', name:'Boxy', twist:'boxy', desc:'Every puzzle has Boxy, with a secret weight from 1 to 5.', icon:()=>boxySVG(false)},
+  {group:'New Penguins', name:'Floaty', twist:'floaty1', desc:'Every puzzle has a Floaty (weighs −1).', icon:()=>floaty()},
+  {group:'New Penguins', name:'Twins', twist:'twins', desc:'Every puzzle has the Twins (1 + 1, side by side).', icon:()=>twinsSVG()},
+  {group:'New Penguins', name:'WHAM', twist:'wham', desc:'Every puzzle has WHAM (2 + 2 across two squares).', icon:()=>whamSVG()},
+  {group:'New Penguins', name:'Snoozy', twist:'snoozy', desc:'Every puzzle has Snoozy (2 + 1, and it can flip).', icon:()=>snoozySVG()},
+  {group:'Bonus', name:'Chick Circus', mono:1, desc:'Three chicks on every floe, plus a surprise special penguin.', icon:()=>chick()},
+  {group:'Bonus', name:'Pip Party', mono:2, desc:'Three Pips on every floe, plus a surprise special penguin.', icon:()=>peng('#3D7DD8')},
+  {group:'Bonus', name:'Emperor Expedition', mono:3, desc:'Three emperors on every floe, plus a surprise special penguin.', icon:()=>emperor()}
+];
+const CH_UNLOCK_NEXT=30, CH_UNLOCK_PICK=60;
+const chalR=(si,n)=>{ const S=SECTIONS[si]; return S.r || (n<=10?3:n<=20?6:9); };
+function chalCfg(si,n){ const S=SECTIONS[si], R=chalR(si,n), easy=(n-1)%10<2;
+  if(S.r) return {r:R,w:'7',pivot:'w',hints:(R>3&&n<=3)?'some':'none',prule:'diff'};
+  if(S.twist) return {r:R,w:'7',pivot:'w',hints:easy?'some':'none',prule:'diff',twist:S.twist};
+  // some two-square penguins can never balance against three identical penguins, so they are left out
+  const keys=S.mono===1?['chonk','mega','boxy','floaty1','twins','wham','snoozy']:S.mono===2?['chonk','mega','boxy','floaty1','wham','snoozy']:['chonk','mega','boxy','floaty1'];
+  return {r:R,w:'7',pivot:'w',hints:easy?'some':'none',prule:'any',mono:S.mono,twist:[1,11,21].includes(n)?'none':keys[rnd(keys.length)]};
+}
+const THR = R => R===3?[40,55,70]:R===6?[90,120,150]:[150,195,240];
+const starsForR=(s,R)=>{ const t=THR(R); return s<t[0]?3:s<t[1]?2:s<t[2]?1:0; };
+const bestOfR=(v,R)=>{ const r=recOf(v); if(!r) return null; const a=starsForR(r.t,R), b=r.ct!=null?starsForR(r.ct,R):-1; return b>=a?{stars:b,clean:true,time:r.ct}:{stars:a,clean:false,time:r.t}; };
+const chalState=()=>load('pz-chal',{done:{},picks:[]});
+const sectionStars=(si,C=chalState())=>range(30).reduce((a,i)=>{ const v=C.done[si+'-'+(i+1)]; return a+(v?bestOfR(v,chalR(si,i+1)).stars:0); },0);
+const sectionMax=(si,C=chalState())=>{ let m=0; for(let n=1;n<=30;n++) if(C.done[si+'-'+n]) m=n; return m; };
+const isUnlocked=(si,C=chalState())=> si===0 || C.picks.includes(si) || sectionStars(si-1,C)>=CH_UNLOCK_NEXT;
+const picksAvail=(C=chalState())=> SECTIONS.reduce((a,_,i)=>a+(sectionStars(i,C)>=CH_UNLOCK_PICK?1:0),0) - C.picks.length;
+let CHSEC=null;
+function goChal(){ G=null; CHSEC=null; renderChal(); show('levels','Challenges'); }
+function goSection(si){ G=null; CHSEC=si; renderSection(si); show('levels',SECTIONS[si].name); }
+function renderChal(){
+  const C=chalState(), pk=picksAvail(C);
+  let h=`<p class="startotal">Each section has 30 challenges and up to 90 ★. Get <b>30 ★</b> in a section to unlock the next one. Get <b>60 ★</b> in a section to earn a <b>🎟 free pick</b> that unlocks any section you like.</p>`;
+  if(pk>0) h+=`<p class="pickban">🎟 You have ${pk} free pick${pk>1?'s':''}! Tap any locked section to unlock it.</p>`;
+  let grp='';
+  SECTIONS.forEach((S,si)=>{
+    if(S.group!==grp){ grp=S.group; h+=`<h3 class="tier">${grp==='New Penguins'?'Meet the New Penguins':grp==='Bonus'?'Bonus':'The Basics'}</h3>`; }
+    const un=isUnlocked(si,C), st=sectionStars(si,C);
+    const need = un ? '' : `Get 30 ★ in ${SECTIONS[si-1].name} to unlock${pk>0?', or use a free pick':''}.`;
+    h+=`<button class="chcard ${un?'':'locked'}" data-sec="${si}"><span class="chic">${S.icon()}</span><span class="cht"><b>${S.name}</b><small>${un?S.desc:need}</small><span class="chst"><span class="gold">★</span> ${st} / 90</span></span><span class="chgo">${un?'›':pk>0?'🎟':'🔒'}</span></button>`;
+  });
+  $('#levels').innerHTML=h;
+}
+function renderSection(si){
+  const C=chalState(), m=sectionMax(si,C), S=SECTIONS[si];
+  let h=`<p class="startotal">${S.desc} <span class="gold">★</span> ${sectionStars(si,C)} / 90</p>`;
+  [[1,'Challenges 1–10'],[11,'Challenges 11–20'],[21,'Challenges 21–30']].forEach(([s,t])=>{
+    const R=chalR(si,s), th=THR(R);
+    h+=`<h3 class="tier">${t}</h3><p class="tierp">${R} floes. 3★ under ${fmt(th[0])}, 2★ under ${fmt(th[1])}, 1★ under ${fmt(th[2])}.</p><div class="lvgrid">`;
+    /* Every challenge in an unlocked section is playable: gating them in order fights the
+       point of a section you chose to open. The green ring still marks the next unplayed. */
+    for(let n=s;n<s+10;n++){ const v=C.done[si+'-'+n], ok=v!=null, b=ok?bestOfR(v,chalR(si,n)):null;
+      h+=`<button class="lv ${ok?'done':''} ${n===m+1?'next':''}" data-ch="${si}-${n}" aria-label="Challenge ${n}"><span class="ln">${n}</span>${ok?`<span class="st">${starHTML(b.stars,b.clean)}</span><span class="tm">${fmt(b.time)}</span>`:''}</button>`; }
+    h+='</div>';
+  });
+  $('#levels').innerHTML=h;
+}
+function tapSection(si){
+  const C=chalState();
+  if(isUnlocked(si,C)) return goSection(si);
+  if(picksAvail(C)>0){ C.picks.push(si); save('pz-chal',C); toast(`🎟 Unlocked ${SECTIONS[si].name}!`); return renderChal(); }
+  toast(`Get 30 ★ in ${SECTIONS[si-1].name} to unlock ${SECTIONS[si].name}, or get 60 ★ in any section for a free pick.`);
+}
+
+function goLevels(){ G=null; renderLevels(); show('levels','Levels'); }
+
+
+/* ---------- fish, power-ups, unlimited ---------- */
+let FISH = load('pz-fish', 200);
+function syncFish(){ $('#fishN').textContent=FISH.toLocaleString(); }
+function addFish(n){ FISH+=n; save('pz-fish',FISH); syncFish(); }
+const PUS = [
+  {id:'peek', name:'Igloo Peek', cost:30, icon:()=>IGLOO, desc:'Shows who lives in one igloo you pick.', target:'igloo'},
+  {id:'sweep', name:'Igloo Sweep', cost:90, icon:()=>`<span class="sweepic">${IGLOO}<b>✨</b></span>`, desc:'Shows who lives in every igloo.'},
+  {id:'floe', name:'Floe Check', cost:50, icon:()=>'✓', desc:'Checks one floe. Right: it gets a ✓ and locks in. Wrong: the wrong pieces flash red.', target:'floe'},
+  {id:'col', name:'Column Check', cost:40, icon:()=>'⇅', desc:'Checks one column the same way.', target:'col'},
+  {id:'xray', name:'Boxy X-ray', cost:40, icon:()=>boxySVG(false), desc:'Reveals Boxy’s weight.'},
+  {id:'clock', name:'Ice Clock', cost:35, icon:()=>'<span class="clockic">⏱<b>❄</b></span>', desc:'Takes 15 seconds off your level timer so 3 stars are easier to reach. Stars from that run are gold.'}
+];
+const floeReady = (z,r) => trioDone(z.grid[r]) && !(z.vrows&&z.vrows.has(r));
+const colReady = (z,c) => !(z.vcols&&z.vcols.has(c)) && !(c===z.boxCol && z.grid[z.boxRow][c]===20) && z.grid.reduce((a,row)=>a+wt(row[c]),0)===z.colSum[c];
+const puAllowed = () => G && G.applyAuto && MODE.kind!=='daily' && MODE.kind!=='archive' && MODE.kind!=='tut';
+function puBlock(p){
+  if(finished) return 'This puzzle is already finished.';
+  if(p.id==='clock' && Math.floor((Date.now()-t0)/1000)<1) return 'The clock is already at 0:00.';
+  if(p.id==='xray'){ if(Z.boxRow<0) return 'There’s no Boxy in this puzzle, so there’s nothing to X-ray.'; if(Z.pinned.has(Z.boxRow+','+Z.boxCol)) return 'Boxy’s weight is already revealed.'; }
+  if((p.id==='sweep'||p.id==='peek') && range(Z.R).every(r=>G.locked(Z,r,Z.piv[r]))) return 'Every igloo’s resident is already shown.';
+  if(p.id==='floe' && !range(Z.R).some(r=>floeReady(Z,r))) return range(Z.R).every(r=>Z.vrows.has(r)) ? 'Every floe has already been checked.' : 'Floe Check works on a floe that has a chick, Pip and an emperor on it. Place all three on a floe first.';
+  return '';
+}
+let toastT=null;
+function toast(m){ const t=$('#toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{ t.hidden=true; },3200); }
+function renderPU(){
+  const bar=$('#pubar'); if(!puAllowed()||!Z){ bar.hidden=true; document.body.classList.remove('hasdock'); return; } bar.hidden=false; document.body.classList.add('hasdock');
+  bar.innerHTML=PUS.filter(p=>p.id!=='clock'||MODE.kind==='level'||MODE.kind==='chal').map(p=>{ const dis=!!puBlock(p);
+    return `<button class="pu ${Z.pu===p.id?'on':''} ${dis?'off':''}" data-pu="${p.id}" aria-disabled="${dis}" aria-label="${p.name}, you have ${INV[p.id]||0}"><span class="pi">${p.icon()}</span><span class="pn">${p.name}</span>${INV[p.id]>0?`<span class="cnt">${INV[p.id]}</span>`:'<span class="plus">+</span>'}</button>`; }).join('');
+}
+let PAUSED=0;
+function openPause(){ if(!Z||finished){ return; } PAUSED=Date.now(); $('#pSnd').textContent=`Sound: ${soundOn?'On':'Off'}`; $('#pause').hidden=false; }
+function resume(){ if(PAUSED){ t0+=Date.now()-PAUSED; PAUSED=0; } $('#pause').hidden=true; }
+const FLOE_EXPLAIN = `<div class="floebox"><h3>What’s a floe?</h3><p style="margin:0">An <b>ice floe</b> (say it like “flow”) is a flat sheet of ice floating on the sea. In Penguzzle, each row of squares is a floe resting on a little rock, the ▲. Put too much weight on one side and it tips! <button class="linkbtn" id="helpStory">Read Pip’s story</button></p></div>`;
+function openHelp(){
+  const body = (G&&Z) ? $('#rules').innerHTML
+    : `<p>Every floe needs one <b>chick</b> (1), one <b>Pip</b> (2) and one <b>emperor</b> (3), placed so the floe balances on its ▲. The numbers under the board tell you how much weight each column needs.</p>`+TippyFloe.rules(null)+`<p><b>Levels:</b> the big button, endless puzzles that slowly get harder. <b>Challenges:</b> themed sections that unlock as you earn stars. <b>Daily Floe:</b> one new puzzle a day for everyone, with a special penguin. <b>Archive:</b> replay past Dailies. Power-ups cost 🐟 fish, which you earn by playing.</p>`;
+  $('#helpBody').innerHTML=FLOE_EXPLAIN+body; $('#help').hidden=false; syncClock(); }
+function openStore(msg=''){ $('#storeMsg').textContent=msg; $('#storeN').textContent=FISH.toLocaleString();
+  $('#pulist').innerHTML=PUS.map(p=>`<li><b>${p.name}</b> · you have ${INV[p.id]||0}<br>${p.desc}<div class="buyrow"><button class="btn" data-buypu="${p.id}" data-q="1">Buy 1 · 🐟 ${p.cost}</button><button class="btn ghost" data-buypu="${p.id}" data-q="3">Buy 3 · 🐟 ${bundlePrice(p)}</button></div></li>`).join(''); $('#store').hidden=false; syncClock(); }
+
+
+let INV = load('pz-inv', {peek:2, sweep:1, floe:2, col:1, xray:1, clock:2});
+if(INV.clock==null){ INV.clock=2; save('pz-inv',INV); }
+const saveInv = () => save('pz-inv', INV);
+const bundlePrice = p => Math.round(p.cost*2.5);
+function consume(id){ if(!(INV[id]>0)){ openBuy(id); return false; } INV[id]--; saveInv(); return true; }
+function buyPU(id,q){ const p=PUS.find(x=>x.id===id), price= q===3?bundlePrice(p):p.cost;
+  if(FISH<price){ $('#buy').hidden=true; return openStore(`You need ${price-FISH} more fish for ${q===3?'3 ':''}${p.name}.`); }
+  FISH-=price; save('pz-fish',FISH); syncFish(); INV[id]=(INV[id]||0)+q; saveInv(); tone([880,1175]);
+  toast(`+${q} ${p.name}`); if(!$('#buy').hidden) openBuy(id); if(!$('#store').hidden) openStore(); if(G&&Z) renderPU(); }
+function openBuy(id){ const p=PUS.find(x=>x.id===id);
+  $('#buyBody').innerHTML=`<div class="buyic">${p.icon()}</div><h2>${p.name}</h2><p>${p.desc}</p><p>You have <b>${INV[id]||0}</b>. You have <b>🐟 ${FISH.toLocaleString()}</b> fish.</p>
+  <div class="buyrow"><button class="btn" data-buypu="${id}" data-q="1">Buy 1 · 🐟 ${p.cost}</button><button class="btn" data-buypu="${id}" data-q="3">Buy 3 · 🐟 ${bundlePrice(p)}</button></div>`;
+  $('#buy').hidden=false; syncClock(); }
+const GIFT_POOL=['peek','peek','peek','floe','floe','floe','col','col','col','clock','clock','sweep','xray'];
+function grantGifts(k){ const got=[]; for(let i=0;i<k;i++){ const id=GIFT_POOL[Math.floor(Math.random()*GIFT_POOL.length)]; INV[id]=(INV[id]||0)+1; got.push(PUS.find(x=>x.id===id).name); } saveInv(); return got; }
+const giftLine = g => g.length ? `<span class="gift">🎁 ${g.map(n=>'+1 '+n).join(', ')}</span>` : '';
+
+function spend(cost){ if(FISH<cost){ openStore(`You need ${cost-FISH} more fish for that.`); return false; } FISH-=cost; save('pz-fish',FISH); syncFish(); return true; }
+function markPU(){ Z.usedPU=true; Z.assisted=true; }
+const emptyish=v=>v===0||v===4||v===5;
+function cellRight(r,c){ const t=G.truthAt(Z,r,c), v=Z.grid[r][c]; return t===0 ? emptyish(v) : v===t; }
+function cellWrong(r,c){ const t=G.truthAt(Z,r,c), v=Z.grid[r][c]; if(v===0||v===5) return false; if(v===4) return t!==0; if(v===20) return false; return v!==t; }
+function flashBad(cells){ Z.badCells=new Set(cells); draw(); const zz=Z; setTimeout(()=>{ if(Z===zz){ Z.badCells=new Set(); draw(); } },1800); }
+function usePU(id){
+  if(!Z) return; const p=PUS.find(x=>x.id===id);
+  if(Z.pu===id){ Z.pu=null; draw(); return setMsg(''); }
+  const why=puBlock(p); if(why) return toast(why);
+  if(id==='col' && !range(Z.W).some(c=>colReady(Z,c))){ Z.assisted=true; return toast('Column Check works on a column once its pieces add up to the number underneath it. No column does yet.'); }
+  if(p.target){ if(!(INV[id]>0)) return openBuy(id);
+    Z.pu=id; if(id==='col') Z.assisted=true; draw(); return setMsg(p.target==='igloo'?'Tap a glowing igloo to peek inside. Tap Igloo Peek again to cancel.':p.target==='floe'?'Tap a glowing floe to check it. Only floes with a chick, Pip and an emperor can be checked.':'Tap a glowing column to check it. Only columns that add up to their total can be checked.','ok'); }
+  if(id==='sweep'){ if(!consume(id)) return; markPU(); for(let r=0;r<Z.R;r++) G.pin(Z,r,Z.piv[r]); afterMove(); return setMsg('Every igloo’s resident is now shown and locked in.','ok'); }
+  if(id==='clock'){ if(!consume(id)) return; markPU(); t0=Math.min(Date.now(), t0+15000); $('#timer').textContent=fmt(Math.floor((Date.now()-t0)/1000)); saveProgress(); renderPU(); tone([1175,880]); return setMsg('Ice Clock: 15 seconds shaved off the timer!','ok'); }
+  if(id==='xray'){ if(!consume(id)) return; markPU(); G.pin(Z,Z.boxRow,Z.boxCol); afterMove(); return setMsg(`Boxy weighs ${Z.boxW}.`,'ok'); }
+}
+function targetPU(r,c){
+  const id=Z.pu, p=PUS.find(x=>x.id===id); if(!p) return;
+  if(id==='peek'){ if(c!==Z.piv[r]) return setMsg('That isn’t an igloo. Tap one of the glowing igloos.','err');
+    if(G.locked(Z,r,c)) return setMsg('That igloo’s resident is already shown. Pick another igloo.','err');
+    if(!consume(id)) return; markPU(); Z.pu=null; G.pin(Z,r,c); afterMove(); const v=G.truthAt(Z,r,c); return setMsg(v?`A ${NAME[v]} lives in that igloo.`:'Nobody lives in that igloo.','ok'); }
+  if(id==='col' && !colReady(Z,c)) return setMsg(Z.vcols.has(c) ? `Column ${c+1} is already checked.` : `Column ${c+1} doesn’t add up to its total yet, so it can’t be checked.`,'err');
+  if(id==='floe' && !floeReady(Z,r)) return setMsg(Z.vrows.has(r) ? `Floe ${r+1} is already checked.` : `Floe ${r+1} needs a chick, Pip and an emperor before it can be checked.`,'err');
+  const cells = id==='floe' ? range(Z.W).map(x=>[r,x]) : range(Z.R).map(x=>[x,c]);
+  if(!consume(id)) return; markPU(); Z.pu=null;
+  const wrong=cells.filter(([a,b])=>cellWrong(a,b)), right=cells.every(([a,b])=>cellRight(a,b)), label=id==='floe'?`Floe ${r+1}`:`Column ${c+1}`;
+  if(right){ cells.forEach(([a,b])=>G.pin(Z,a,b)); if(id==='floe') Z.vrows.add(r); else Z.vcols.add(c); afterMove(); tone([660,880,1175]); return setMsg(`${label} is correct! It’s locked in.`,'ok'); }
+  if(wrong.length){ draw(); flashBad(wrong.map(([a,b])=>a+','+b)); return setMsg(`${wrong.length} piece${wrong.length>1?'s':''} in ${label.toLowerCase()} ${wrong.length>1?'are':'is'} wrong. They’re flashing red.`,'err'); }
+  draw(); return setMsg(`Nothing in ${label.toLowerCase()} is wrong so far, but it isn’t finished yet.`,'ok');
+}
+function levelCfg(n){
+  /* levelR, not a second copy of the rule. This line used to inline it, so the levels list
+     and the board it actually builds were two separate statements of the same thing — and
+     changing one silently left the other behind. Same disease as the stale "9 floes" blurb. */
+  const R = levelR(n);
+  let twist='none';
+  const keys=levelPool(n);
+  if(isSpikeLevel(n)) twist = keys[rnd(keys.length)];
+  /* Never on the level straight after a peak: that one is the relief, and a surprise
+     special penguin is not relief. */
+  else if(n>16 && n%6!==1 && rnd(10)<3) twist = keys[rnd(keys.length)];
+  return {r:R,w:'7',pivot:'w',hints:'none',prule:'diff',twist};
+}
+const progKey = () => MODE.kind==='daily' ? 'pz-prog-'+MODE.day : MODE.kind==='archive' ? 'pz-prog-A'+MODE.day : MODE.kind==='level' ? 'pz-prog-L'+MODE.n : MODE.kind==='chal' ? 'pz-prog-C'+MODE.si+'-'+MODE.n : null;
+function open(id,mode={kind:'sandbox'}){
+  G=GAMES.find(g=>g.id===id); if(!G) return; MODE=mode;
+  const sb=mode.kind==='sandbox';
+  show('game', sb?G.name : mode.kind==='level'?`Level ${mode.n}${isSpikeLevel(mode.n)?' ⚡':''}`:mode.kind==='chal'?`${SECTIONS[mode.si].name} ${mode.n}`:mode.kind==='tut'?`Lesson ${mode.n} of ${TUT_STEPS}`:mode.kind==='archive'?`Archive: ${isWeekend(mode.day)?'Weekend':''} ${new Date(mode.day+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'})}`.replace(':  ',': '):isWeekend(mode.day)?'Mega Weekend':'Daily Floe');
+  $('#sandbox').hidden=!sb; $('#newBtn').hidden=!sb; $('#revealBtn').hidden=!sb;
+  const daily=mode.kind==='daily'||mode.kind==='archive';
+  $('#hintBtn').hidden=!G.hint||daily||mode.kind==='level'; $('#autoBtn').hidden=!G.applyAuto; $('#curBtn').hidden=!G.applyAuto||daily||mode.kind==='tut'; $('#giveupBtn').hidden=!daily; $('#giveupBtn').textContent='Give up'; $('#devBtn').hidden=!(DEV||sb); syncAuto();
+  if(sb){ try{ location.hash=id; }catch(e){} renderControls(); }
+  newPuzzle();
+}
+const weekAB = day => { const d=new Date(day+'T12:00:00'); const days=Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); return Math.floor((days+3)/7)%2===0?'A':'B'; };
+const twistFor = day => { const wk=weekAB(day)==='A'?WEEK_A:WEEK_B; return isWeekend(day) ? {...wk[0], name:'Mega Weekend'} : wk[dow(day)]; };
+function params(){ return MODE.kind==='sandbox'?P[G.id]:MODE.kind==='tut'?tutCfg(MODE.n):MODE.kind==='level'?levelCfg(MODE.n):MODE.kind==='chal'?chalCfg(MODE.si,MODE.n):{r:isWeekend(MODE.day)?6:3,w:'7',pivot:'w',hints:'none',prule:'diff',twist:twistFor(MODE.day)}; }
+function seed(){ return MODE.kind==='tut'?tutSeed(MODE.n) : MODE.kind==='level'?levelSeed(MODE.n) : MODE.kind==='chal'?200000+MODE.si*100+MODE.n : (MODE.kind==='daily'||MODE.kind==='archive')?+MODE.day.replace(/-/g,'') : null; }
+
+function renderControls(){
+  const p=P[G.id];
+  $('#controls').innerHTML=G.schema.map(s=> s.type==='range'
+    ? `<div class="ctrl"><label for="c-${s.key}">${s.label}<span id="v-${s.key}">${p[s.key]}</span></label><input type="range" id="c-${s.key}" data-k="${s.key}" min="${s.min}" max="${s.max}" step="1" value="${p[s.key]}"></div>`
+    : `<div class="ctrl"><label>${s.label}</label><div class="seg">${s.options.map(([v,t])=>`<button data-k="${s.key}" data-v="${v}" aria-pressed="${String(p[s.key])===v}">${t}</button>`).join('')}</div></div>`).join('');
+}
+function syncAuto(){ const b=$('#autoBtn'); b.textContent=`Auto ✕: ${AUTOX?'On':'Off'}`; b.setAttribute('aria-pressed',String(AUTOX));
+  const c=$('#curBtn'); c.textContent=`Current weight: ${SHOWCUR?'On':'Off'}`; c.setAttribute('aria-pressed',String(SHOWCUR)); }
+
+function newPuzzle(){
+  const a=performance.now(); Z=withSeed(seed(),()=>G.generate(params())); genMs=Math.round(performance.now()-a);
+  Z.pure = MODE.kind==='daily'||MODE.kind==='archive'; Z.weekend = Z.pure && isWeekend(MODE.day); Z.gaveUp=false; Z.giveArm=false;
+  finished=false; Z.reveal=false; Z.hints=0; Z.assisted=!!(G.applyAuto&&SHOWCUR)&&!Z.pure; Z.hintRows=new Set(); Z.hintCell=null;
+  Z.pinned=new Map(); Z.vrows=new Set(); Z.vcols=new Set(); Z.badCells=new Set(); Z.pu=null; Z.usedPU=false; Z.awarded=false; Z.settles=new Array(Z.R||0).fill(0);
+  let resumeSecs=0;
+  const pk=progKey();
+  if(pk){ const d=dailyState(), pr=load(pk,null);
+    const blocked = MODE.kind==='daily' && (d.solved[MODE.day] || (d.gaveUp&&d.gaveUp[MODE.day]));
+    if(pr && !blocked && pr.grid && pr.grid.length===Z.R && pr.grid[0].length===Z.W){ Z.grid=pr.grid; resumeSecs=pr.secs||0;
+      if(pr.pins) Z.pinned=new Map(pr.pins); if(pr.vrows) Z.vrows=new Set(pr.vrows); if(pr.vcols) Z.vcols=new Set(pr.vcols); if(pr.used){ Z.usedPU=true; Z.assisted=true; } if(pr.settles&&pr.settles.length===Z.R) Z.settles=pr.settles; } }
+  if(G.applyAuto) G.applyAuto(Z);
+  Z.okRows = G.rowOk ? new Set(range(Z.R).filter(r=>G.rowOk(Z,r))) : new Set();
+  $('#rules').innerHTML=G.rules(Z); $('#twistbox').innerHTML=Z.twistHTML||''; setMsg('');
+  if(MODE.kind==='tut') $('#twistbox').innerHTML=`<div class="tutcard">${TUT_INTRO[MODE.n]}</div>`;
+  else if(!load('pz-seenhelp',false)){ save('pz-seenhelp',true); openHelp(); }
+  t0=Date.now()-resumeSecs*1000; clearInterval(tick); tick=setInterval(()=>{ if(!finished && !PAUSED) $('#timer').textContent=fmt(Math.floor((Date.now()-t0)/1000)); },500);
+  $('#timer').textContent=fmt(resumeSecs);
+  if(resumeSecs) setMsg('Welcome back! Your progress was saved.','ok');
+  draw();
+  if(MODE.kind==='tut') tutGuide();
+}
+function draw(){
+  G.render(Z,$('#board')); $('#hud').innerHTML=G.hud(Z)+((MODE.kind==='level'&&isSpikeLevel(MODE.n))?'<span>⚡ <b>Spike level</b>: double fish</span>':''); renderPU();
+  if(MODE.kind==='sandbox'){ const st={...Z.stats,'Built in':`${genMs} ms`}; $('#stats').innerHTML=Object.entries(st).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join(''); }
+}
+function setMsg(t,cls=''){ const m=$('#msg'); m.textContent=t; m.className=cls; }
+function bump(r){ const el=document.querySelector(`.frow[data-r="${r}"]`); if(el){ el.classList.remove('lock'); void el.offsetWidth; el.classList.add('lock'); } }
+function saveProgress(){ const k=progKey(); if(Z && G && k && !finished) save(k,{grid:Z.grid,secs:Math.floor((Date.now()-t0)/1000),pins:[...(Z.pinned||[])],vrows:[...(Z.vrows||[])],vcols:[...(Z.vcols||[])],used:!!Z.usedPU,settles:Z.settles}); }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') saveProgress(); });
+function afterMove(keepHint=false){
+  if(Z.bad) Z.bad.clear();
+  if(!keepHint) Z.hintCell=null;
+  if(G.applyAuto) G.applyAuto(Z);
+  let newly=[];
+  if(G.rowOk){ const now=new Set(range(Z.R).filter(r=>G.rowOk(Z,r))); newly=[...now].filter(r=>!Z.okRows.has(r)); Z.okRows=now; if(Z.settles) newly.forEach(r=>Z.settles[r]++); }
+  draw(); if(!keepHint) setMsg('');
+  saveProgress();
+  if(!finished && !Z.reveal && G.solved(Z)) return win();
+  if(newly.length){ tone([784,1047]); newly.forEach(bump); }
+  if(MODE.kind==='tut') tutGuide();
+}
+function win(){
+  finished=true; Z.secs=Math.floor((Date.now()-t0)/1000); Z.won=true; if(Z.boxRow>=0) draw();
+  let delay=350;
+  if(G.rowOk){ range(Z.R).forEach(r=>setTimeout(()=>bump(r),r*110)); delay=Z.R*110+650; }
+  tone([523,659,784,1047,1319],.15,.1);
+  setTimeout(showSheet,delay);
+}
+// Tap anywhere over the hidden sheet to bring the results back — the first thing anyone
+// tries. Registered on the overlay rather than inside the delegated button handler, which
+// only ever sees clicks that land on a button.
+$('#win').addEventListener('click', e => {
+  const w=$('#win');
+  if(w.classList.contains('peeking') && e.target.id!=='winEye'){ w.classList.remove('peeking'); }
+});
+
+function showSheet(){
+  $('#win').classList.remove('peeking');
+  const secs=Z.secs, sb=MODE.kind==='sandbox';
+  $('#winMascot').innerHTML=`<div class="mascot">${peng(COLORS[Math.floor(Math.random()*COLORS.length)])}</div>`;
+  $('#rateWrap').hidden=!sb; $('#shareBtn').hidden=MODE.kind!=='daily'; $('#shareText').hidden=true; $('#winExtra').textContent=''; $('#winCoins').textContent='';
+  const hintTxt = (Z.hints ? `, ${Z.hints} hint${Z.hints>1?'s':''}` : ', no hints') + (Z.assisted ? (Z.usedPU ? ', power-ups used' : ', current weight on') : '');
+  if(sb){
+    $('#winTime').textContent=`${G.name} in ${fmt(secs)}`;
+    $('#rate').innerHTML=[1,2,3,4,5].map(n=>`<button data-r="${n}" aria-pressed="false" aria-label="${n} out of 5">${peng(n>=4?'#24A06A':n===3?'#3D7DD8':'#8A63D2')}${n}</button>`).join('');
+    const log=loadLog(); (log[G.id]=log[G.id]||[]).push({secs,rating:0,at:Date.now(),params:{...P[G.id]}}); saveLog(log);
+    setSheetBtns('Next puzzle','next','Back to board','close');
+  } else if(MODE.kind==='level'){
+    const done=levelsDone(), clean=!Z.hints&&!Z.assisted, r=recOf(done[MODE.n])||{t:Infinity,ct:null}, prevT=r.t;
+    const prevStars = done[MODE.n]!=null ? bestOf(done[MODE.n],MODE.n).stars : 0, firstClear = done[MODE.n]==null;
+    save(progKey(),null);
+    r.t=Math.min(r.t,secs); if(clean) r.ct = r.ct==null?secs:Math.min(r.ct,secs); done[MODE.n]=r; save('pz-levels',done);
+    $('#winH').textContent=`Level ${MODE.n} done!`;
+    /* No star bonus: Levels is the casual endless mode and carries no rating. Stars belong
+       to Challenges, the mode someone picks on purpose. */
+    const got = firstClear ? ({3:10,6:20,9:30}[Z.R]||10)*(isSpikeLevel(MODE.n)?2:1)+(Z.usedPU?0:5) : 0;
+    if(got) addFish(got);
+    const gifts = firstClear && MODE.n%5===0 ? grantGifts(MODE.n%10===0?2:1) : [];
+    $('#winCoins').innerHTML=(got?`+${got} 🐟`:'')+(gifts.length?`${got?'':''}<span class="gift">🎁 Reward chest! ${gifts.map(n=>'+1 '+n).join(', ')}</span>`:'');
+    $('#winTime').innerHTML=`${fmt(secs)}${hintTxt}${prevT<secs?`, best ${fmt(prevT)}`:''}`;
+    $('#winExtra').textContent='';
+    setSheetBtns('Next level','nextlevel','Home','home');
+  } else if(MODE.kind==='chal'){
+    const C=chalState(), si=MODE.si, n=MODE.n, key=si+'-'+n, R=Z.R, clean=!Z.hints&&!Z.assisted, before=C.done[key];
+    const firstClear=before==null, prevStars=before?bestOfR(before,R).stars:0, unBefore=SECTIONS.map((_,i)=>isUnlocked(i,C)), pkBefore=picksAvail(C);
+    const r=recOf(before)||{t:Infinity,ct:null}, prevT=r.t; r.t=Math.min(r.t,secs); if(clean) r.ct=r.ct==null?secs:Math.min(r.ct,secs);
+    C.done[key]=r; save('pz-chal',C); save(progKey(),null);
+    const st=starsForR(secs,R), th=THR(R), gain=Math.max(0,bestOfR(r,R).stars-prevStars);
+    const got=(firstClear?({3:10,6:20,9:30}[R]||10):0)+gain*5; if(got) addFish(got);
+    $('#winH').textContent=`${SECTIONS[si].name} ${n} done!`;
+    $('#winTime').innerHTML=`<span class="bigstars" aria-label="${st} ${clean?'diamond ':''}stars">${starHTML(st,clean)}</span><br>${fmt(secs)}${hintTxt}${prevT<secs?`, best ${fmt(prevT)}`:''}`;
+    if(got) $('#winCoins').textContent=`+${got} 🐟`;
+    const news=[]; SECTIONS.forEach((S,i)=>{ if(!unBefore[i] && isUnlocked(i,C)) news.push(`🔓 ${S.name} unlocked!`); });
+    if(picksAvail(C)>pkBefore) news.push('🎟 You earned a free pick: unlock any section you like!');
+    /* Where the section stands, and what the next one is waiting on — shown here because
+       this is the moment the number changed; the section list is two taps away. */
+    const secStars = sectionStars(si, C);
+    news.push(`<span class="secstars"><span class="gold">★</span> ${secStars} / 90 in this section</span>`);
+    if(si+1 < SECTIONS.length && !isUnlocked(si+1, C)){
+      const need = CH_UNLOCK_NEXT - secStars;
+      if(need > 0) news.push(`<span class="unlockhint">${need} more ★ to unlock ${SECTIONS[si+1].name}</span>`);
+    }
+    const tips=[]; if(st<3) tips.push(`Finish under ${fmt(th[2-st])} for ${st+1} star${st?'s':''}.`); if(!clean&&st>0) tips.push('No hints, no power-ups and Current weight off earns diamond stars.');
+    $('#winExtra').innerHTML=(news.length?news.join('<br>')+'<br>':'')+tips.join(' ');
+    if(n<30) setSheetBtns('Next challenge','nextchal','Challenges','chalsec',true,true); else setSheetBtns(null,null,'Challenges','chalsec',true,true);
+  } else if(MODE.kind==='tut'){
+    if(MODE.n>tutDone()) save('pz-tut',MODE.n);
+    if(MODE.n<TUT_STEPS){ $('#winH').textContent=`Lesson ${MODE.n} done!`; $('#winTime').textContent=MODE.n===1?'You balanced your first floe.':'You used the column totals like a pro.'; setSheetBtns('Next lesson','nexttut','Home','home'); }
+    else { const first=!load('pz-tutgift',false); if(first){ save('pz-tutgift',true); addFish(50); $('#winCoins').textContent='+50 🐟 welcome gift'; }
+      $('#winH').textContent='You’re ready! 🎉'; $('#winTime').textContent='That’s the whole game. Start with Challenges for easy practice, or jump into the endless Levels.'; setSheetBtns('Play Challenges','gochal','Play Level 1','play'); }
+  } else if(MODE.kind==='archive'){
+    save(progKey(),null); const A=archiveState(), first=A.done[MODE.day]==null; if(first||secs<A.done[MODE.day]) A.done[MODE.day]=secs; save('pz-archive',A);
+    $('#winH').textContent='Archive puzzle done!';
+    $('#winTime').textContent=`${isWeekend(MODE.day)?'Mega Weekend':twistFor(MODE.day).name}, ${dailyLabel(MODE.day)}, in ${fmt(secs)}`;
+    const keys=allPuzzleKeys(PRESEASON_START, dayBefore(todayKey())).filter(k=>k<todayKey()), left=keys.filter(k=>archDone(k)==null).length;
+    $('#winExtra').textContent= left ? `${left} archive puzzle${left>1?'s':''} left to complete.` : '🏆 Archive complete! You’ve solved every past Daily.';
+    setSheetBtns('Archive','archive','Home','home');
+  } else {
+    const d=dailyState(), t=todayKey(), gaveUp=!!(d.gaveUp&&d.gaveUp[t]);
+    save('pz-prog-'+t,null);
+    if(!d.solved[t] && !gaveUp){ d.streak = d.last===prevKey(t) ? d.streak+1 : 1; d.last=t; d.solved[t]={secs,hints:Z.hints,share:buildShare(t,secs,Z.settles,d.streak)}; save('pz-daily',d); const bonus=25+Math.min(50,5*d.streak); addFish(bonus); const g=grantGifts(1); $('#winCoins').innerHTML=`+${bonus} 🐟`+giftLine(g); }
+    $('#winH').textContent=isWeekend(t)?'Mega Weekend done!':'Daily Floe done!';
+    $('#winTime').textContent=`${fmt(secs)}`;
+    $('#winExtra').textContent= gaveUp ? 'Replay after giving up, so this one doesn’t count toward your streak.' : `🔥 ${d.streak}-day streak`;
+    $('#shareBtn').hidden=gaveUp;
+    if(!gaveUp){ const card=(d.solved[t]&&d.solved[t].share)||buildShare(t,secs,Z.settles,d.streak); DD_TEXT=card; const pre=$('#shareText'); pre.textContent=card; pre.className='sharecard'; pre.hidden=false; }
+    setSheetBtns(null,null,'Back home','home');
+  }
+  $('#win').hidden=false;
+}
+function setSheetBtns(nextLabel,nextAct,closeLabel,closeAct,alsoHome,alsoRetry){
+  const n=$('#winNext'); n.hidden=!nextLabel; if(nextLabel){ n.textContent=nextLabel; n.dataset.act=nextAct; }
+  const c=$('#winClose'); c.textContent=closeLabel; c.dataset.act=closeAct;
+  // Where "back" isn't already home, offer home too — otherwise finishing a challenge leaves
+  // the section list as the only way out.
+  $('#winHome').hidden = !alsoHome;
+  /* Offered where stars are on the line and another go could improve them. */
+  $('#winRetry').hidden = !alsoRetry;
+  if(MODE.kind==='sandbox') $('#winH').textContent='Solved!';
+}
+
+/* ---------- daily share card ---------- */
+
+/* ---------- Daily Archive ---------- */
+const PRESEASON_START='2026-10-01';
+const LAUNCH_DATE=null; // set to 'YYYY-MM-DD' on the day Penguzzle goes public: that day becomes Daily #1
+const allPuzzleKeys=(from,to)=>{ const out=[]; let d=new Date(from+'T12:00:00'); const end=new Date(to+'T12:00:00');
+  while(d<=end){ const k=d.toLocaleDateString('en-CA'); const pk=puzzleKeyOf(k); if(!out.includes(pk)) out.push(pk); d.setDate(d.getDate()+1); } return out; };
+const archiveState=()=>load('pz-archive',{done:{}});
+const archDone=(k,A=archiveState(),D=dailyState())=> A.done[k]!=null ? A.done[k] : (D.solved[k]?D.solved[k].secs:null);
+
+/* ---------- First-time tutorial ---------- */
+const TUT_STEPS=3;
+const tutDone=()=>load('pz-tut',0);
+/* Chosen boards, not base+n. Each lesson owns one of the game's three deductions, and the
+   old seeds were whatever 300000+n happened to generate — so lesson 2, the lesson about
+   column totals, could be solved start to finish by balancing floes. Picked by solving every
+   candidate with the hint engine and keeping the boards whose own technique is actually
+   needed. The Swift port uses these same numbers; it used to run 700000+n, so lessons 2 and
+   3 were different puzzles on the two builds. */
+function tutSeed(n){ return n===1 ? 700001 : n===2 ? 125 : 787; }
+function tutCfg(n){ return n===1 ? {r:1,w:'5',pivot:'c',hints:'lots',prule:'any'} : n===2 ? {r:3,w:'5',pivot:'c',hints:'some',prule:'any'} : {r:3,w:'7',pivot:'w',hints:'some',prule:'diff'}; }
+/* A headline, and nothing else. Lesson 1 used to carry the whole explanation — rock,
+   multipliers, worked sum and controls — in one paragraph above the board; it pushed the
+   floe off the top of a phone screen, and nobody reads nine lines to start a penguin game.
+   The teaching moved to tutStep(), one thing at a time as the board changes. */
+const TUT_INTRO={
+  1:'<b>Lesson 1: Weight × distance.</b> The ▲ is the rock this floe rests on. The number above each square is what it multiplies a penguin’s weight by — that’s how hard the penguin pushes from there.',
+  2:'<b>Lesson 2: Column totals.</b> More floes drifted in! The number under each column is the plain weight it holds — no multiplying this time. Use the totals to work out who goes where, and the ×N to keep each floe level.',
+  3:'<b>Lesson 3: Igloos.</b> The square above each ▲ is an igloo. <b>New rule from here on:</b> each kind of penguin lives in exactly one of them — one chick, one Pip, one emperor across the three floes. Settle two and the third has no choice left.'
+};
+/* Lesson 1's coaching line, chosen from what is on the board right now.
+   Driven by the board rather than by a counter, so it stays right however the player gets
+   there — clearing a floe or placing the chick first walks back to the matching step
+   instead of running out of script.
+   The numbers are written out because lesson 1's seed is fixed: Pip is given at ×1 and the
+   answer is an emperor over the ▲ and a chick at ×2, for every player, forever. The Swift
+   port's TutorialTests asserts exactly that board. */
+function tutCoach(z, lesson){
+  if(lesson===1) return coachBalance(z);
+  if(lesson===2) return coachColumns(z);
+  return coachIgloos(z);
+}
+/* Lesson 1 — weight × distance. The numbers are written out because the seed is fixed. */
+function coachBalance(z){
+  const piv=z.piv[0]; let left=0,right=0,rock=false,any=false;
+  for(let c=0;c<z.W;c++){ const w=wt(z.grid[0][c]); if(!w) continue; any=true;
+    const d=c-piv; if(d<0) left+=w*-d; else if(d>0) right+=w*d; else rock=true; }
+  if(left===right && any) return {col:null,landed:true,text:'<b>Level!</b> 2 × 1 on the left, 1 × 2 on the right — both push 2. A light penguin far out balances a heavy one sitting close in.'};
+  if(!rock) return {col:null,landed:false,text:'Pip weighs 2 and sits at ×1, so he pushes 2 × 1 = 2 and the floe tips his way. Try the square over the ▲ first: it’s <b>×0</b>, so whoever sits there pushes nothing at all.'};
+  return {col:null,landed:false,text:'See? Over the ▲ nothing pushes, however heavy. Now cancel out Pip’s 2 — find a square on the right where weight × its number also makes 2.'};
+}
+/* Lesson 2 — column totals. Only two kinds of column are forced outright, and both are
+   arithmetic a child can do on sight: one already holding everything it needs, and one
+   needing the most its empty squares can possibly carry. Anything subtler is the hint
+   engine's job, not a lesson's. Derived from the board, so it survives a seed change. */
+function coachColumns(z){
+  const heaviest=Math.max.apply(null,TV);
+  for(let c=0;c<z.W;c++){
+    const target=z.colSum[c];
+    const now=z.grid.reduce((a,row)=>a+wt(row[c]),0);
+    const open=range(z.R).filter(r=>!TippyFloe.locked(z,r,c)&&(z.grid[r][c]===0||z.grid[r][c]===5));
+    if(!open.length) continue;
+    const need=target-now;
+    if(need===0) return {col:c,landed:false,text:`Column ${c+1} already holds all <b>${target}</b> it needs, so every square still open in it has to stay empty. The totals rule squares <i>out</i> as well as in.`};
+    /* Said separately rather than pluralised in place: "has only 1 square left" followed by
+       "in every one of them" makes a child reread the card looking for squares they missed. */
+    if(need===open.length*heaviest) return {col:c,landed:false,text: open.length===1
+      ? `Column ${c+1} needs <b>${target}</b> and has one square left, so it has to make up the last ${need} on its own. Only <b>${aNAME(heaviest)} (${heaviest})</b> is that heavy.`
+      : `Column ${c+1} needs <b>${target}</b> and has only ${open.length} squares left — the only way to get there is <b>${aNAME(heaviest)} (${heaviest})</b> in every one of them.`};
+  }
+  if(TippyFloe.solved(z)) return {col:null,landed:true,text:'<b>Every column adds up.</b> Read down a column and the total tells you what can still fit — often before you work out the balancing at all.'};
+  return {col:null,landed:false,text:'Each number under the board is that column’s weight added straight down — no multiplying this time. Look for a column whose total only one set of penguins can reach.'};
+}
+/* Lesson 3 — igloos. One of each kind, so the last igloo is decided by the other two. */
+function coachIgloos(z){
+  const quota=Math.max(1,z.R/3), placed=[0,0,0,0]; let empty=[];
+  for(let r=0;r<z.R;r++){ const v=z.grid[r][z.piv[r]]; if(isAnimal(v)) placed[v]++; else empty.push(r); }
+  const unused=[1,2,3].filter(w=>placed[w]<quota);
+  if(!empty.length && !unused.length) return {col:null,landed:true,text:'<b>Every igloo has its own kind of penguin.</b> Whenever two igloos are settled, the third has no choice left.'};
+  if(empty.length===1 && unused.length===1) return {col:null,landed:false,text:`Only <b>${theNAME(unused[0])}</b> is still without an igloo, and floe ${empty[0]+1}’s is the only one empty — so that is where it goes. No balancing needed.`};
+  const full=[1,2,3].find(w=>placed[w]>=quota);
+  if(full!==undefined) return {col:null,landed:false,text:`<b>${theNAME(full).replace(/^./,m=>m.toUpperCase())}</b> has its igloo now, so no other floe can put one over its ▲. That takes a choice away from every floe still open.`};
+  return {col:null,landed:false,text:'Each kind of penguin lives in exactly <b>one</b> igloo — one chick, one Pip, one emperor across the three floes. Fill one in and watch the tracker above rule it out everywhere else.'};
+}
+
+/* ---------- Pip's story: what a floe is ---------- */
+function storyArt(kind){
+  const m = kind==='tip' ? 'worried' : 'happy';
+  const crew = kind==='calm' ? `<span class="sa-p" style="width:26%">${peng('#3D7DD8',{mood:'happy'})}</span>`
+    : [[chick(m),15],[peng('#3D7DD8',{mood:m}),21],[emperor(m),28]].map(([a,w])=>`<span class="sa-p" style="width:${w}%">${a}</span>`).join('');
+  return `<div class="story-art ${kind}"><div class="sa-floe">${crew}</div><div class="sa-rock"></div><div class="sa-water"></div></div>`;
+}
+const STORY=[
+  {art:'calm', text:'This is <b>Pip</b>. Pip lives far down south, where the sea gets so cold that the water freezes into big, flat sheets of ice that float around. Those floating ice sheets are called <b>ice floes</b>. You say it just like “flow.”'},
+  {art:'tip', text:'Floes are wobbly! Each one rests on a little rock, the ▲. If too much weight piles up on one side, the floe tips and everybody slides into the freezing water. Brrr!'},
+  {art:'level', text:'Pip and his friends each need a spot so every floe stays perfectly level. Will you help? Pip will show you how.'}
+];
+let STORY_I=0, STORY_THEN='tut';
+function openStory(then){ STORY_I=0; STORY_THEN=then||'tut'; renderStory(); $('#story').hidden=false; }
+function renderStory(){ const p=STORY[STORY_I];
+  $('#storyArt').innerHTML=storyArt(p.art); $('#storyText').innerHTML=p.text;
+  $('#storyDots').innerHTML=STORY.map((_,i)=>`<i class="${i===STORY_I?'on':''}"></i>`).join('');
+  $('#storyNext').textContent = STORY_I<STORY.length-1 ? 'Next' : (STORY_THEN==='tut' ? 'Let’s go!' : 'Got it'); }
+function storyNext(){ if(STORY_I<STORY.length-1){ STORY_I++; return renderStory(); } endStory(); }
+function endStory(){ $('#story').hidden=true; if(STORY_THEN==='tut') return open('tippyfloe',{kind:'tut',n:1}); if(PAUSED) $('#pause').hidden=false; }
+
+function startTutorial(n){ save('pz-seenhelp',true); const k=n||Math.min(tutDone()+1,TUT_STEPS); if(k===1) return openStory('tut'); open('tippyfloe',{kind:'tut',n:k}); }
+function tutGuide(){
+  if(MODE.kind!=='tut'||!Z||finished) return;
+  const h=G.hint(Z); if(!h) return;
+  Z.hintCell={r:h.r,c:h.c};
+  const msg = h.place ? `Try ${aNAME(h.w)} in the glowing square.` : h.msg;
+  draw(); setMsg('👉 '+msg,'ok');
+}
+function skipTutorial(){ save('pz-tut',TUT_STEPS); save('pz-seenhelp',false); renderHome(); }
+
+
+/* ---------- Settings + About ---------- */
+// BACKLOG: charity section is built but hidden until a pledge amount and permission are settled
+const SHOW_CHARITY = false;
+const charityCard = () => `<div class="charity"><div class="charart">${peng('#3D7DD8',{mood:'happy'})}<span class="heart">❤</span>${emperor('happy')}</div><h3>Helping real penguins</h3><p>Real penguins are in trouble: many species are losing numbers fast. ${CHARITY.pledge}</p><a class="btn" href="${CHARITY.url}" target="_blank" rel="noopener">Visit ${CHARITY.name}</a></div>`;
+const CHARITY = { name:'Penguins International', url:'https://www.penguinsinternational.org',
+  pledge:'A portion of Penguzzle’s proceeds is donated to Penguins International, a nonprofit dedicated to penguin conservation, research and education.' };
+function goSettings(){ G=null; CHSEC=null; renderSettings(); show('levels','Settings'); }
+function renderSettings(){
+  const row=(id,label,val)=>`<button class="setrow" id="${id}"><span>${label}</span><b>${val}</b></button>`;
+  $('#levels').innerHTML=`
+  <div class="setgroup"><h3>Game</h3>
+    ${row('setTheme','Appearance',{system:'System',light:'Light',dark:'Dark'}[THEME])}
+    ${row('setSnd','Sound',soundOn?'On':'Off')}
+    ${row('setAuto','Auto ✕',AUTOX?'On':'Off')}
+    ${row('setCur','Current weight (easy mode)',SHOWCUR?'On':'Off')}
+  </div>
+  <div class="setgroup"><h3>Learn</h3>
+    ${row('setHelp','How to play','›')}
+    ${row('setStory','Read Pip’s story','›')}
+    ${row('setTut','Replay the tutorial','›')}
+  </div>
+  ${SHOW_CHARITY ? charityCard() : ''}
+  <div class="setgroup"><h3>About</h3>
+    <p class="about">Penguzzle is made by <b>Kurtesy Games</b>. Thanks for playing, and for helping Pip keep every floe level. 🐧</p>
+  </div>`;
+}
+
+function goArchive(){ G=null; CHSEC=null; renderArchive(); show('levels','Daily Archive'); }
+function renderArchive(){
+  const t=todayKey(), keys=allPuzzleKeys(PRESEASON_START, dayBefore(t)).filter(k=>k<t).reverse(), A=archiveState(), D=dailyState();
+  const doneN=keys.filter(k=>archDone(k,A,D)!=null).length;
+  let h=`<p class="startotal">Replay every past Daily. Archive puzzles don’t change your streak or earn stars or fish; they’re here so you can complete the collection.</p>
+  <p class="archcount">✅ ${doneN} of ${keys.length} completed</p>`;
+  if(!keys.length) h+='<p class="tierp">No past puzzles yet. Check back tomorrow!</p>';
+  let month='';
+  keys.forEach(k=>{ const d=new Date(k+'T12:00:00'), m=d.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+    if(m!==month){ if(month) h+='</div>'; month=m; h+=`<h3 class="tier">${m}</h3><div class="archgrid">`; }
+    const secs=archDone(k,A,D), wk=isWeekend(k), lab=wk?`${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}–${new Date(d.getTime()+864e5).getDate()}`:d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+    h+=`<button class="arch ${secs!=null?'done':''} ${wk?'wk':''}" data-arch="${k}"><span class="ad">${lab}</span><span class="an">${dailyLabel(k)}</span><span class="at">${wk?'Mega Weekend':twistFor(k).name}</span><span class="as">${secs!=null?'✓ '+fmt(secs):'Not played'}</span></button>`; });
+  if(month) h+='</div>';
+  $('#levels').innerHTML=h;
+}
+const dailyLabel = k => (LAUNCH_DATE && k>=LAUNCH_DATE) ? `#${Math.round((new Date(k+'T12:00:00')-new Date(LAUNCH_DATE+'T12:00:00'))/864e5)+1}` : `Preseason #${allPuzzleKeys(PRESEASON_START,k).length}`;
+
+const shareLink = () => (/^https?:/.test(location.protocol) && !/claude/.test(location.hostname)) ? location.origin+location.pathname.replace(/index\.html$/,'') : '';
+function buildShare(k,secs,settles,streak){
+  const tw=twistFor(k), rows=(settles||[]).map(n=>n<=1?'🟩':n===2?'🟨':'🟥');
+  const specials=[...(tw.fixed||[]).map(w=>w===5?'Mega Chonk':'Chonk'), tw.box?'Boxy':'', tw.twins?'Twins':'', tw.wham?'WHAM':'', tw.snoozy?'Snoozy':'', tw.balloons?(tw.balloons>1?tw.balloons+' Floaty':'Floaty'):''].filter(Boolean).join(' + ');
+  const lines=[`🐧 Penguzzle ${isWeekend(k)?'Mega Weekend':'Daily'} ${dailyLabel(k)}`, isWeekend(k)?specials:tw.name, ''];
+  for(let i=0;i<rows.length;i+=3) lines.push(rows.slice(i,i+3).join(''));
+  lines.push('', `⏱ ${fmt(secs)}${streak?`   🔥 ${streak}`:''}`);
+  const perfect=rows.length&&rows.every(x=>x==='🟩'); if(perfect) lines.push('🧊 Perfect balance, no do-overs');
+  const link=shareLink(); if(link) lines.push(link);
+  return lines.join('\n');
+}
+function shareText(text, where){
+  const show=()=>{ const pre=$(where); pre.textContent=text; pre.hidden=false; };
+  const copied=()=>toast('Copied! Paste it into a text or group chat.');
+  const fallback=()=>{ show(); try{ navigator.clipboard.writeText(text).then(copied,()=>toast('Copy the text below to share it.')); }catch(e){ toast('Copy the text below to share it.'); } };
+  if(navigator.share){ navigator.share({text}).catch(err=>{ if(!err||err.name!=='AbortError') fallback(); }); } else fallback();
+}
+function openDailyDone(){
+  const d=dailyState(), t=todayKey(), sv=d.solved[t];
+  if(!sv) return open('tippyfloe',{kind:'daily',day:t});
+  const text=sv.share||buildShare(t,sv.secs,null,d.streak);
+  $('#ddBody').innerHTML=`<h2>${isWeekend(t)?'Mega Weekend':'Daily'} solved!</h2><p>${twistFor(t).name} in ${fmt(sv.secs)}. 🔥 ${d.streak}-day streak.</p><pre class="sharecard">${text}</pre>`;
+  $('#dailyDone').hidden=false; DD_TEXT=text;
+}
+let DD_TEXT='';
+const DEV = (()=>{ try{ const q=location.search+location.hash; if(/dev=0/.test(q)) localStorage.removeItem('pz-dev'); else if(/dev/.test(q)) localStorage.setItem('pz-dev','1'); return !!localStorage.getItem('pz-dev'); }catch(e){ return false; } })();
+function autoSolve(){
+  if(!Z||finished) return; const g=G;
+  for(let r=0;r<Z.R;r++) for(let c=0;c<Z.W;c++){ if(g.isBox && g.isBox(Z,r,c)){ Z.grid[r][c]=20+Z.boxW; continue; } if(!g.locked(Z,r,c)) Z.grid[r][c]=g.truthAt(Z,r,c)||0; }
+  afterMove();
+}
+function setRating(n){
+  document.querySelectorAll('#rate button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.r===n)));
+  const log=loadLog(), l=log[G.id]; if(l&&l.length){ l[l.length-1].rating=n; saveLog(log); }
+}
+
+/* events */
+let lpTimer=null, suppressClick=false, lastPtr='', lpX=0, lpY=0;
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button'); if(!t) return;
+  if(t.dataset.mode==='sandbox') return open(t.dataset.g);
+  if(t.dataset.go==='levels') return goLevels();
+  if(t.dataset.go==='daily') return openDailyDone();
+  if(t.dataset.lv) return open('tippyfloe',{kind:'level',n:+t.dataset.lv});
+  if(t.dataset.go==='chal') return goChal();
+  if(t.dataset.go==='archive') return goArchive();
+  if(t.id==='setBtn') return goSettings();
+  if(t.id==='setTheme'){ THEME={system:'light',light:'dark',dark:'system'}[THEME]; save('pz-theme',THEME); applyTheme(); return renderSettings(); }
+  if(t.id==='setSnd'){ soundOn=!soundOn; save('pz-sound',soundOn); syncSnd(); return renderSettings(); }
+  if(t.id==='setAuto'){ AUTOX=!AUTOX; save('pz-autox',AUTOX); syncAuto(); return renderSettings(); }
+  if(t.id==='setCur'){ SHOWCUR=!SHOWCUR; save('pz-showcur',SHOWCUR); syncAuto(); return renderSettings(); }
+  if(t.id==='setHelp') return openHelp();
+  if(t.id==='setStory') return openStory('close');
+  if(t.id==='setTut') return startTutorial(1);
+  if(t.id==='mascot') return pokeMascot();
+  if(t.id==='hole') return castLine();
+  if(t.dataset.go==='gift') return openGift();
+  if(t.dataset.chest!==undefined) return takeChest(+t.dataset.chest);
+  if(t.id==='giftClose'){ $('#gift').hidden=true; return; }
+  if(t.dataset.go==='tut') return startTutorial();
+  if(t.id==='storyNext') return storyNext();
+  if(t.id==='storySkip') return endStory();
+  if(t.id==='helpStory'){ $('#help').hidden=true; return openStory('close'); }
+  if(t.id==='skipTut') return skipTutorial();
+  if(t.id==='helpTut'){ $('#help').hidden=true; $('#pause').hidden=true; PAUSED=0; return startTutorial(1); }
+  if(t.dataset.arch) return open('tippyfloe',{kind:'archive',day:t.dataset.arch});
+  if(t.dataset.sec) return tapSection(+t.dataset.sec);
+  if(t.dataset.ch){ const [si,n]=t.dataset.ch.split('-').map(Number); return open('tippyfloe',{kind:'chal',si,n}); }
+  if(t.id==='back'){ saveProgress(); if(!G && CHSEC!=null) return goChal(); return goHome(); }
+  if(t.id==='ddArch'){ $('#dailyDone').hidden=true; return goArchive(); }
+  if(t.id==='snd'){ soundOn=!soundOn; save('pz-sound',soundOn); syncSnd(); if(soundOn) tone([660]); return; }
+  if(t.id==='clearLog'){ saveLog({}); return renderHome(); }
+  if(t.id==='newBtn'){ return newPuzzle(); }
+  if(t.id==='winNext'){ $('#win').hidden=true; if(t.dataset.act==='nextlevel') return open('tippyfloe',{kind:'level',n:MODE.n+1}); if(t.dataset.act==='nexttut') return startTutorial(MODE.n+1); if(t.dataset.act==='gochal') return goChal(); if(t.dataset.act==='archive') return goArchive(); if(t.dataset.act==='nextchal') return open('tippyfloe',{kind:'chal',si:MODE.si,n:MODE.n+1}); return newPuzzle(); }
+  if(t.id==='fishBtn') return openStore();
+  if(t.id==='helpBtn') return openHelp();
+  if(t.id==='helpClose'){ $('#help').hidden=true; if(PAUSED) $('#pause').hidden=false; return; }
+  if(t.id==='pauseBtn'){ if(!Z||finished) return goHome(); return openPause(); }
+  if(t.id==='resumeBtn') return resume();
+  if(t.id==='pHelp'){ $('#pause').hidden=true; return openHelp(); }
+  if(t.id==='pSnd'){ soundOn=!soundOn; save('pz-sound',soundOn); syncSnd(); t.textContent=`Sound: ${soundOn?'On':'Off'}`; return; }
+  if(t.id==='pHome'){ resume(); saveProgress(); return goHome(); }
+  if(t.id==='storeClose'){ $('#store').hidden=true; if(G&&Z) draw(); return; }
+  if(t.dataset.buypu) return buyPU(t.dataset.buypu,+t.dataset.q);
+  if(t.id==='buyClose'){ $('#buy').hidden=true; return; }
+  if(t.dataset.buy){ addFish(+t.dataset.buy); $('#storeN').textContent=FISH.toLocaleString(); $('#storeMsg').textContent=`Added ${(+t.dataset.buy).toLocaleString()} fish.`; tone([880,1175]); return; }
+  if(t.dataset.go==='play') return playNextLevel();
+  if(t.dataset.go==='streak') return open('tippyfloe',{kind:'daily',day:todayKey()});
+  if(t.dataset.go==='shop') return openStore();
+  if(t.dataset.pu) return usePU(t.dataset.pu);
+  if(t.id==='winEye'){ $('#win').classList.add('peeking'); return; }
+  if(t.id==='winHome'){ $('#win').hidden=true; return goHome(); }
+  if(t.id==='winRetry'){ $('#win').hidden=true; return newPuzzle(); }
+  if(t.id==='winClose'){ $('#win').hidden=true; const a=t.dataset.act; if(a==='play') return playNextLevel(); if(a==='chalsec') return goSection(MODE.si); if(a==='levels') return goLevels(); if(a==='home') return goHome(); return; }
+  if(t.id==='shareBtn') return shareText(DD_TEXT,'#shareText');
+  if(t.id==='ddShare') return shareText(DD_TEXT,'#ddBody .sharecard');
+  if(t.id==='ddPlay'){ $('#dailyDone').hidden=true; return open('tippyfloe',{kind:'daily',day:todayKey()}); }
+  if(t.id==='ddClose'){ $('#dailyDone').hidden=true; return; }
+  if(t.id==='devBtn') return autoSolve();
+  if(t.closest('#rate')) return setRating(+t.dataset.r);
+  if(t.id==='giveupBtn'){
+    if(finished) return;
+    if(!Z.giveArm){ Z.giveArm=true; t.textContent='Tap again to give up'; const zz=Z; setTimeout(()=>{ if(Z===zz&&!finished){ Z.giveArm=false; t.textContent='Give up'; } },3000); return; }
+    finished=true; Z.reveal=true; Z.gaveUp=true; t.textContent='Gave up';
+    if(MODE.kind==='archive'){ save(progKey(),null); draw(); return setMsg('The answer is shown faded. Archive puzzles never affect your streak.','ok'); }
+    const d=dailyState(), k=todayKey();
+    save('pz-prog-'+k,null);
+    if(!d.solved[k]){ d.gaveUp=d.gaveUp||{}; d.gaveUp[k]=true; d.last=k; save('pz-daily',d); }
+    draw(); return setMsg('Today’s answer is shown faded. Your streak is safe, but today doesn’t count as a solve.','ok');
+  }
+  if(t.id==='curBtn'){ SHOWCUR=!SHOWCUR; save('pz-showcur',SHOWCUR); syncAuto();
+    if(SHOWCUR&&Z&&!finished&&!Z.assisted){ Z.assisted=true; draw(); return setMsg(MODE.kind==='sandbox'?'Current weight is on.':'Easy mode on: this puzzle will earn gold stars instead of diamonds.'); }
+    return draw(); }
+  if(t.id==='autoBtn'){ AUTOX=!AUTOX; save('pz-autox',AUTOX); syncAuto(); return afterMove(); }
+  if(t.id==='clearBtn'){ G.clear(Z); Z.reveal=false; if(Z.okRows) Z.okRows=new Set(); return afterMove(); }
+  if(t.id==='revealBtn'){ Z.reveal=!Z.reveal; finished=finished||Z.reveal; draw(); return setMsg(Z.reveal?'Faded pieces show the answer.':''); }
+  if(t.id==='hintBtn'){
+    if(finished) return;
+    const h=G.hint(Z); if(!h) return setMsg('Everything’s already in place.','ok');
+    Z.hints++; Z.hintRows.add(h.r); Z.hintCell={r:h.r,c:h.c};
+    if(h.place){ if(G.place) G.place(Z,h.r,h.c,h.w); else Z.grid[h.r][h.c]=h.w; afterMove(true); } else draw();
+    if(!finished) setMsg(h.msg,'ok'); return;
+  }
+  if(t.closest('.seg')){ P[G.id][t.dataset.k]=t.dataset.v; renderControls(); return newPuzzle(); }
+  if(t.dataset.clr!==undefined){ if(finished||Z.gaveUp) return; G.clearRow(Z,+t.dataset.clr); return afterMove(); }
+  if(t.closest('#board')){
+    if(suppressClick){ suppressClick=false; return; }
+    if((finished && !Z.reveal) || Z.gaveUp) return;
+    if(Z.pu && t.dataset.r!==undefined) return targetPU(+t.dataset.r,+t.dataset.c);
+    if(t.dataset.r!==undefined) G.tapRC(Z,+t.dataset.r,+t.dataset.c);
+    else if(t.dataset.i!==undefined) G.tap(Z,+t.dataset.i);
+    afterMove();
+  }
+});
+document.addEventListener('input',e=>{
+  const k=e.target.dataset&&e.target.dataset.k; if(!k||!G) return;
+  P[G.id][k]=+e.target.value; $('#v-'+k).textContent=e.target.value;
+});
+document.addEventListener('change',e=>{ if(e.target.type==='range' && G) newPuzzle(); });
+
+/* tap the dark background behind a pop-up to close it */
+document.addEventListener('click',e=>{
+  const bg=e.target; if(!bg.classList || !bg.classList.contains('sheetbg')) return;
+  const id=bg.id;
+  if(id==='store'){ bg.hidden=true; if(G&&Z) draw(); }
+  else if(id==='buy'||id==='dailyDone') bg.hidden=true;
+  else if(id==='help'){ bg.hidden=true; if(PAUSED) $('#pause').hidden=false; }
+  else if(id==='pause') resume();
+});
+/* long press = ✕ */
+function cancelLP(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } }
+document.addEventListener('pointerdown',e=>{
+  lastPtr=e.pointerType; suppressClick=false; cancelLP();
+  const s=e.target.closest('#board .slot'); if(!s||!G||!G.markX||(Z&&Z.pu)) return;
+  if(e.pointerType==='mouse'&&e.button!==0) return;
+  lpX=e.clientX; lpY=e.clientY;
+  lpTimer=setTimeout(()=>{ lpTimer=null; if((finished&&!Z.reveal)||Z.gaveUp) return; suppressClick=true;
+    G.markX(Z,+s.dataset.r,+s.dataset.c); try{ navigator.vibrate&&navigator.vibrate(15); }catch(_){} afterMove(); },450);
+});
+document.addEventListener('pointermove',e=>{ if(lpTimer && Math.hypot(e.clientX-lpX,e.clientY-lpY)>10) cancelLP(); });
+document.addEventListener('pointerup',cancelLP);
+document.addEventListener('pointercancel',cancelLP);
+document.addEventListener('contextmenu',e=>{
+  const s=e.target.closest('#board .slot'); if(!s) return; e.preventDefault();
+  if(lastPtr==='mouse' && G && G.markX && !(finished&&!Z.reveal)){ G.markX(Z,+s.dataset.r,+s.dataset.c); afterMove(); }
+});
+
+/* ---------- sheets over the board ---------- */
+/* Two things every sheet needs and none of them had: the dimmed area closes it, and the clock
+   stops while it is up. Reading the rules or buying a power-up shouldn't cost three stars, and
+   a sheet you can't dismiss by tapping beside it feels broken even when a Close button exists.
+
+   One function decides whether the clock runs, rather than each sheet remembering to pause and
+   resume — which is how nesting (How to play opened from Paused) got it wrong. */
+const BOARD_SHEETS = ['#pause', '#store', '#buy', '#help'];
+function syncClock(){
+  const covered = BOARD_SHEETS.some(id => { const el = $(id); return el && !el.hidden; });
+  if(covered){ if(Z && !finished && !PAUSED) PAUSED = Date.now(); }
+  else if(PAUSED){ t0 += Date.now() - PAUSED; PAUSED = 0; }
+}
+/* Registered after the main click handler, so it sees whatever that just opened or closed.
+   An early `return` in one listener doesn't stop the others. */
+document.addEventListener('click', syncClock);
+/* Same reason as the resume inside tone(): coming back to the tab leaves the audio context
+   suspended, and a tap is the only moment a browser will let us start it again. */
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && AC && AC.state !== 'running') AC.resume();
+});
+
+document.querySelectorAll('.sheetbg').forEach(bg => {
+  /* The win sheet is deliberately left out: its result has to be acted on, and it already
+     has its own tap-anywhere behaviour for peeking at the board. */
+  if(bg.id === 'win' || bg.id === 'story') return;
+  bg.addEventListener('click', e => {
+    if(e.target !== bg) return;             // the dimmed area itself, not a child
+    if(bg.id === 'pause') return resume();  // which also puts the clock back
+    bg.hidden = true;
+    syncClock();
+  });
+});
+
+syncSnd(); syncFish(); renderHome(); runSplash();
+
+</script>
+</body>
+</html>
